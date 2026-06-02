@@ -567,3 +567,108 @@ export async function getOrganisationViewData(orgId: string) {
     matches,
   };
 }
+
+// ── Background Web Sweeping Agent ──
+
+async function sweepQuery(query: string) {
+  try {
+    const searchResults = await searchWeb(query, "week");
+    for (const result of searchResults) {
+      try {
+        if (!result.url) continue;
+        const urlHost = new URL(result.url).hostname;
+        
+        let exists = await prisma.signal.findUnique({
+          where: { url: result.url }
+        });
+        
+        if (!exists) {
+          const enrichment = await classifyAndEnrichSignal(
+            result.title,
+            result.content || result.snippet || "",
+            urlHost
+          );
+          
+          const textToEmbed = result.title + " " + (result.content || result.snippet || "");
+          const embedding = await getEmbedding(textToEmbed);
+          
+          await prisma.signal.create({
+            data: {
+              source: urlHost,
+              url: result.url,
+              publishedAt: new Date(),
+              title: result.title,
+              summary: enrichment.summary,
+              body: result.content || result.snippet || "",
+              domain: enrichment.domain,
+              sentiment: enrichment.sentiment,
+              impact: enrichment.impact,
+              entities: JSON.stringify(enrichment.entities || []),
+              regulations: JSON.stringify(enrichment.regulations || []),
+              geographies: JSON.stringify(enrichment.geographies || ["Global"]),
+              embeddingString: JSON.stringify(embedding),
+              confidence: enrichment.confidence || 0.8,
+              sourcesCited: JSON.stringify(result.url ? [result.url] : []),
+            }
+          });
+          console.log(`[RiskLens Agent] Ingested new signal: "${result.title}"`);
+        }
+      } catch (itemErr) {
+        console.error("[RiskLens Agent] Error processing signal item:", itemErr);
+      }
+    }
+  } catch (err) {
+    console.error(`[RiskLens Agent] Error sweeping query "${query}":`, err);
+  }
+}
+
+export async function runSingleSignalSweep() {
+  const queries = [
+    "geopolitical risk international conflict trade sanctions corporate impact news",
+    "regulatory compliance new law EUDR CSRD AI Act SEC news",
+    "enterprise artificial intelligence governance security risk cyber attack news",
+    "corporate climate change risk water scarcity environmental regulation news",
+    "macroeconomic inflation interest rates market volatility margin pressure news",
+    "global supply chain disruption logistics shipping delays material shortage news"
+  ];
+  const query = queries[Math.floor(Math.random() * queries.length)];
+  console.log(`[RiskLens Agent] Running single live sweep for query: "${query}"`);
+  await sweepQuery(query);
+}
+
+export async function runHourlySignalSweep() {
+  const queries = [
+    "geopolitical risk international conflict trade sanctions corporate impact news",
+    "regulatory compliance new law EUDR CSRD AI Act SEC news",
+    "enterprise artificial intelligence governance security risk cyber attack news",
+    "corporate climate change risk water scarcity environmental regulation news",
+    "macroeconomic inflation interest rates market volatility margin pressure news",
+    "global supply chain disruption logistics shipping delays material shortage news"
+  ];
+  console.log(`[RiskLens Agent] Starting full hourly web sweep for all ${queries.length} domains...`);
+  for (const query of queries) {
+    await sweepQuery(query);
+  }
+  console.log("[RiskLens Agent] Full web sweep completed.");
+}
+
+// Register background scheduler on startup (server-side Node environment only)
+if (typeof window === "undefined") {
+  const globalRef = global as any;
+  if (!globalRef.riskLensSweepInterval) {
+    globalRef.riskLensSweepInterval = true;
+    
+    // Run initial sweep in background shortly after server boot
+    setTimeout(() => {
+      console.log("[RiskLens Agent] Running initial startup web sweep...");
+      runHourlySignalSweep().catch(err => console.error("[RiskLens Agent] Initial sweep failed:", err));
+    }, 10000);
+
+    // Schedule hourly sweeps
+    setInterval(() => {
+      console.log("[RiskLens Agent] Running hourly automatic web sweep...");
+      runHourlySignalSweep().catch(err => console.error("[RiskLens Agent] Hourly sweep failed:", err));
+    }, 1000 * 60 * 60);
+  }
+}
+
