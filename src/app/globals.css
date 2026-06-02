@@ -1437,3 +1437,49 @@ body.type-sans .bp-dec-list li::before { font-family: 'DM Sans', sans-serif !imp
   transform: translateY(0);
 }
 
+/* Specific Country filter & Sync Feed button styling */
+.country-sel {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.12s;
+}
+.country-sel:focus {
+  border-color: var(--accent);
+}
+
+.sync-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.12s, opacity 0.12s;
+}
+.sync-btn:hover:not(:disabled) {
+  background: #143c66;
+}
+.sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.sync-btn.syncing {
+  background: var(--border2);
+  color: var(--text3);
+}
+
+

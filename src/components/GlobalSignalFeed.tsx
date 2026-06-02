@@ -46,9 +46,12 @@ export default function GlobalSignalFeed({ onAnalyzeOrg }: GlobalSignalFeedProps
   const [activeDomain, setActiveDomain] = useState("all");
   const [activeImpact, setActiveImpact] = useState("all");
   const [activeRegion, setActiveRegion] = useState("all");
+  const [selectedCountry, setSelectedCountry] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [syncing, setSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState("4 min ago");
 
   // Selected signal detail drawer
   const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null);
@@ -69,14 +72,48 @@ export default function GlobalSignalFeed({ onAnalyzeOrg }: GlobalSignalFeedProps
     fetchSignals();
   }, []);
 
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/signals?live=true");
+      if (!res.ok) throw new Error("Failed to sync live feed");
+      const data = await res.json();
+      setSignals(data);
+      setLastSyncTime("Just now");
+    } catch (err: any) {
+      console.error(err);
+      alert("Error syncing live feed: " + err.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  // Extract all unique countries from signals for the sidebar dropdown
+  const uniqueCountries = Array.from(
+    new Set(
+      signals
+        .flatMap(sig => {
+          try {
+            return JSON.parse(sig.geographies || "[]") as string[];
+          } catch {
+            return [];
+          }
+        })
+        .filter(c => c && c !== "Global")
+    )
+  ).sort();
+
   // Filter calculations
   const filteredSignals = signals.filter(sig => {
-    // Search filter
+    const geos = JSON.parse(sig.geographies || "[]") as string[];
+
+    // Search filter (checks title, summary, body, source AND geographies)
     const matchesSearch = 
       sig.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
       sig.summary.toLowerCase().includes(searchQuery.toLowerCase()) || 
       sig.body.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sig.source.toLowerCase().includes(searchQuery.toLowerCase());
+      sig.source.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      geos.some(g => g.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Domain filter
     const matchesDomain = activeDomain === "all" || sig.domain.toLowerCase() === activeDomain.toLowerCase();
@@ -85,13 +122,17 @@ export default function GlobalSignalFeed({ onAnalyzeOrg }: GlobalSignalFeedProps
     const matchesImpact = activeImpact === "all" || sig.impact.toLowerCase() === activeImpact.toLowerCase();
 
     // Region filter
-    const geos = JSON.parse(sig.geographies || "[]") as string[];
     const matchesRegion = 
       activeRegion === "all" || 
       geos.some(g => g.toLowerCase() === activeRegion.toLowerCase()) ||
       (activeRegion === "global" && geos.includes("Global"));
 
-    return matchesSearch && matchesDomain && matchesImpact && matchesRegion;
+    // Country filter
+    const matchesCountry = 
+      selectedCountry === "all" || 
+      geos.some(g => g.toLowerCase() === selectedCountry.toLowerCase());
+
+    return matchesSearch && matchesDomain && matchesImpact && matchesRegion && matchesCountry;
   });
 
   // Sort calculations
@@ -243,6 +284,23 @@ export default function GlobalSignalFeed({ onAnalyzeOrg }: GlobalSignalFeedProps
             </div>
           </div>
         ))}
+
+        <div className="filter-divider" />
+        <div className="filter-sub-head">Country</div>
+        <div style={{ padding: "6px 14px" }}>
+          <select 
+            className="country-sel"
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+          >
+            <option value="all">All Countries</option>
+            {uniqueCountries.map(country => (
+              <option key={country} value={country.toLowerCase()}>
+                {country}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* MAIN COLUMN */}
@@ -253,7 +311,7 @@ export default function GlobalSignalFeed({ onAnalyzeOrg }: GlobalSignalFeedProps
             <Search size={14} className="text-slate-400" />
             <input 
               type="text" 
-              placeholder="Search signal stream..." 
+              placeholder="Search signal stream by keyword or country..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -295,8 +353,16 @@ export default function GlobalSignalFeed({ onAnalyzeOrg }: GlobalSignalFeedProps
             SEC EDGAR &bull; FCA &bull; Reuters &bull; Bloomberg &bull; FT &bull; Trade Press
           </div>
           <div className="fs-sep" />
-          <div className="fs-item" style={{ marginLeft: "auto" }}>
-            Last sync 4 min ago
+          <div className="fs-item" style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span>Last sync {lastSyncTime}</span>
+            <button 
+              className={`sync-btn ${syncing ? "syncing" : ""}`}
+              onClick={handleSync}
+              disabled={syncing}
+            >
+              <Zap size={10} className={syncing ? "animate-spin" : ""} />
+              {syncing ? "Syncing..." : "Sync Live Feed"}
+            </button>
           </div>
         </div>
 
