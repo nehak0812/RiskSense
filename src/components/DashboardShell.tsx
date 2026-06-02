@@ -290,7 +290,6 @@ export default function DashboardShell({ onBackToLanding }: DashboardShellProps)
           <LensTab id="world" kicker="The" label="World" icon="globe" />
           <div className="lens-divider"></div>
           <LensTab id="yourworld" kicker="Your" label="World" icon="building" locked={!orgUnlocked} />
-          <LensTab id="intersection" kicker="The" label="Intersection" icon="link" locked={!orgUnlocked} />
         </div>
         <div className="nav-right">
           <span className="live-badge">
