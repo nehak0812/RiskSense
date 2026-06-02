@@ -227,8 +227,8 @@ export function FilterRail({ filters, set, counts }: { filters: { domain: string
       {children}
     </div>
   );
-  const Item = ({ active, onClick, color, label, count }: { active: boolean; onClick: () => void; color?: string; label: string; count?: number }) => (
-    <div className={`frail-item ${active ? 'active' : ''}`} onClick={onClick}>
+  const Item = ({ active, onClick, color, label, count, tooltip }: { active: boolean; onClick: () => void; color?: string; label: string; count?: number; tooltip?: string }) => (
+    <div className={`frail-item ${active ? 'active' : ''}`} onClick={onClick} title={tooltip}>
       {color && <span className="frail-dot" style={{ background: color }}></span>}
       <span className="frail-label">{label}</span>
       {count != null && <span className="frail-count">{count}</span>}
@@ -255,13 +255,18 @@ export function FilterRail({ filters, set, counts }: { filters: { domain: string
         ))}
       </Group>
       <Group title="Impact">
-        {([['high', 'High'], ['med', 'Medium'], ['low', 'Low']] as const).map(([k, l]) => (
+        {([
+          ['high', 'High', 'High Impact: Immediate material risk requiring Board-level oversight and action.'],
+          ['med', 'Medium', 'Medium Impact: Significant risk to operations or compliance, monitored by risk owners.'],
+          ['low', 'Low', 'Low Impact: Minor risk with limited exposure, managed through routine controls.']
+        ] as const).map(([k, l, desc]) => (
           <Item 
             key={k} 
             active={filters.impact === k} 
             onClick={() => set({ impact: filters.impact === k ? null : k })} 
             label={l} 
             count={counts[k] || 0}
+            tooltip={desc}
           />
         ))}
       </Group>
