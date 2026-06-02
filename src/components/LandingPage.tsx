@@ -1,432 +1,273 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Compass, ShieldAlert, Cpu, Landmark, Shield, AlertTriangle, ArrowRight } from "lucide-react";
+import React from "react";
+import { Icon } from "./SharedUI";
 
 interface LandingPageProps {
   onLaunchPlatform: () => void;
 }
 
 export default function LandingPage({ onLaunchPlatform }: LandingPageProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [hoveredSection, setHoveredSection] = useState<"world" | "prism" | "intersection" | null>(null);
-  const [activeTab, setActiveTab] = useState<"world" | "prism" | "intersection">("world");
-
-  // Canvas particle flow animation
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationFrameId: number;
-    let width = 0;
-    let height = 0;
-    let particles: Array<{
-      x: number;
-      y: number;
-      tx: number;
-      ty: number;
-      speed: number;
-      size: number;
-      color: string;
-      alpha: number;
-      stage: "incoming" | "refracted";
-      pathIndex: number;
-      progress: number;
-    }> = [];
-
-    const resize = () => {
-      if (!canvas || !containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      canvas.width = width * (window.devicePixelRatio || 1);
-      canvas.height = height * (window.devicePixelRatio || 1);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-    };
-
-    resize();
-    window.addEventListener("resize", resize);
-
-    const initParticle = (forceStart = false) => {
-      const cy = height * 0.5;
-      const prismX = width * 0.5;
-      const pathIndex = Math.floor(Math.random() * 4);
-      
-      const colors = [
-        "rgba(190, 58, 48, ", // Geopolitical (Red)
-        "rgba(29, 78, 130, ", // Regulatory (Blue)
-        "rgba(27, 122, 81, ", // Environmental (Green)
-        "rgba(84, 74, 156, "  // Tech & AI (Purple)
-      ];
-
-      return {
-        x: forceStart ? Math.random() * (prismX - 80) : 0,
-        y: cy + (Math.random() - 0.5) * 15,
-        tx: prismX - 40,
-        ty: cy,
-        speed: 0.003 + Math.random() * 0.004,
-        size: 1 + Math.random() * 2,
-        color: colors[pathIndex],
-        alpha: 0.3 + Math.random() * 0.5,
-        stage: "incoming" as const,
-        pathIndex,
-        progress: forceStart ? Math.random() * 0.8 : 0
-      };
-    };
-
-    // Pre-populate particles
-    for (let i = 0; i < 40; i++) {
-      particles.push(initParticle(true));
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      // Draw background ambient glow
-      const cx = width * 0.5;
-      const cy = height * 0.5;
-      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(width, height) * 0.4);
-      glow.addColorStop(0, "rgba(29, 78, 130, 0.08)");
-      glow.addColorStop(0.5, "rgba(29, 78, 130, 0.02)");
-      glow.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, width, height);
-
-      // Render & Update particles
-      particles.forEach((p, idx) => {
-        p.progress += p.speed;
-
-        if (p.stage === "incoming") {
-          // Flow from left to the center of the prism
-          const prismX = width * 0.5;
-          p.x = p.progress * (prismX - 40);
-          p.y = cy + Math.sin(p.progress * Math.PI * 2) * 5;
-
-          if (p.progress >= 1) {
-            p.stage = "refracted";
-            p.progress = 0;
-            p.x = prismX + 40;
-            p.y = cy;
-            p.speed = 0.002 + Math.random() * 0.003;
-          }
-        } else {
-          // Refracted flow curving towards the right edge
-          const startX = width * 0.5 + 40;
-          const endX = width;
-          const currentX = startX + p.progress * (endX - startX);
-          
-          // Compute Y positions based on path index (refraction angles)
-          let targetY = cy;
-          if (p.pathIndex === 0) targetY = cy - height * 0.22; // Geopolitical path (Up)
-          if (p.pathIndex === 1) targetY = cy - height * 0.08; // Regulatory path (Slight Up)
-          if (p.pathIndex === 2) targetY = cy + height * 0.08; // Environmental path (Slight Down)
-          if (p.pathIndex === 3) targetY = cy + height * 0.22; // Tech & AI path (Down)
-
-          // Smooth interpolation with quadratic curve
-          const easeOut = 1 - Math.pow(1 - p.progress, 2);
-          p.x = currentX;
-          p.y = cy + (targetY - cy) * easeOut + Math.sin(p.progress * 10) * 3;
-
-          if (p.progress >= 1) {
-            // Recycle particle
-            particles[idx] = initParticle();
-          }
-        }
-
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `${p.color}${p.alpha * (1 - p.progress * 0.5)})`;
-        ctx.fill();
-      });
-
-      // Spawn new particles occasionally
-      if (particles.length < 80 && Math.random() < 0.1) {
-        particles.push(initParticle());
-      }
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
   return (
-    <div className="landing-container" ref={containerRef}>
-      {/* Background canvas */}
-      <canvas ref={canvasRef} className="landing-canvas" />
-
-      {/* Top Navigation */}
-      <header className="landing-header">
-        <div className="logo-area">
-          <div className="logo-gem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+    <div style={{ background: "var(--bg)", minHeight: "100vh", color: "var(--text1)" }}>
+      {/* NAV */}
+      <header className="nav">
+        <div className="wrap nav-in">
+          <div className="brand" style={{ cursor: "pointer" }}>
+            <div className="gem">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3 L21 8 L12 13 L3 8 Z" />
+                <path d="M3 8 V16 L12 21 L21 16 V8" />
+              </svg>
+            </div>
+            <span className="brand-name">
+              Risk<b>Lens</b>
+            </span>
           </div>
-          <span className="logo-name font-semibold text-white text-lg">RiskLens</span>
+          <nav className="nav-links">
+            <a href="#lenses">Lenses</a>
+            <a href="#taxonomy">Taxonomy</a>
+            <a href="#how-it-works">Methodology</a>
+          </nav>
+          <div className="nav-cta">
+            <span className="nav-ghost" style={{ cursor: "pointer" }} onClick={onLaunchPlatform}>Sign in</span>
+            <button className="btn btn-primary" onClick={onLaunchPlatform}>
+              Launch Platform <Icon name="arrowR" size={14} color="#fff" />
+            </button>
+          </div>
         </div>
-        <button className="landing-nav-btn font-semibold" onClick={onLaunchPlatform}>
-          Launch Platform &rarr;
-        </button>
       </header>
 
-      {/* Main Hero & Graphic */}
-      <main className="landing-hero">
-        <div className="landing-hero-content">
-          <div className="landing-tag font-semibold">
-            <span className="live-dot" />
-            Active Risk Alignment Engine
+      {/* HERO */}
+      <section className="hero">
+        <div className="wrap hero-grid">
+          <div>
+            <div className="hero-badge">
+              <span className="pulse"></span>
+              Live emerging risk monitoring
+            </div>
+            <h1>
+              Emerging risk intelligence, <em>unpacked.</em>
+            </h1>
+            <p className="hero-sub">
+              RiskLens monitors <b>2,840+ global sources</b> to capture sanctions, tariffs, AI governance,
+              and climate signals. It maps them semantically to your corporate footprint to score
+              relevance and generate board-ready briefings.
+            </p>
+            <div className="hero-actions">
+              <button className="btn btn-primary btn-lg" onClick={onLaunchPlatform}>
+                Analyze your organisation <Icon name="arrowR" size={16} color="#fff" />
+              </button>
+            </div>
+            <div className="hero-note">
+              <Icon name="shield" size={14} />
+              No configuration required to start with Brightwell plc demo.
+            </div>
           </div>
-          <h1 className="landing-title font-serif">
-            Refract the Noise. <br />
-            <span className="gradient-text font-serif">Align the Risk.</span>
-          </h1>
-          <p className="landing-sub">
-            RiskLens structures chaotic global signals, maps them through your organizational parameters, and delivers instant, board-ready risk intelligence.
-          </p>
+
+          <div className="preview">
+            <div className="browser">
+              <div className="browser-bar">
+                <span className="dot" style={{ background: "#ff5f56" }}></span>
+                <span className="dot" style={{ background: "#ffbd2e" }}></span>
+                <span className="dot" style={{ background: "#27c93f" }}></span>
+                <div className="browser-url">
+                  <Icon name="lock" size={10} />
+                  risklens.ey.com/platform
+                </div>
+              </div>
+              <div className="pv-body">
+                <div className="pv-tabs">
+                  <span className="pv-tab on">The World</span>
+                  <span className="pv-tab">Your World</span>
+                  <span className="pv-tab">The Intersection</span>
+                </div>
+                <div className="pv-kpis">
+                  <div className="pv-kpi">
+                    <span className="l">Signals this week</span>
+                    <div className="v">51</div>
+                    <span className="d">▲ 14%</span>
+                  </div>
+                  <div className="pv-kpi">
+                    <span className="l">High impact</span>
+                    <div className="v" style={{ color: "var(--red)" }}>
+                      15
+                    </div>
+                    <span className="d red">▲ +4</span>
+                  </div>
+                  <div className="pv-kpi">
+                    <span className="l">New today</span>
+                    <div className="v">8</div>
+                    <span className="d">active</span>
+                  </div>
+                </div>
+                <div className="pv-chart">
+                  <div className="pv-chart-t" style={{ fontSize: 9, fontWeight: 600, color: "var(--text3)", marginBottom: 4 }}>
+                    SIGNAL VOLUME TREND
+                  </div>
+                  <div style={{ height: 32, background: "var(--bg3)", borderRadius: 4, display: "flex", alignItems: "flex-end", padding: "2px 6px", gap: 3 }}>
+                    {[12, 15, 14, 18, 16, 20, 22, 25, 24, 28, 26, 30].map((h, i) => (
+                      <div key={i} style={{ flex: 1, height: `${(h / 30) * 100}%`, background: "var(--accent)", opacity: 0.8, borderRadius: 1 }}></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pv-sig">
+                  <span className="bar" style={{ background: "var(--d-trade)" }}></span>
+                  <div>
+                    <div className="h">US reciprocal tariff on packaged consumer goods effective 1 July</div>
+                    <div className="m">Reuters · 1 hr ago · Trade & Supply</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* floating cards */}
+            <div className="float-card">
+              <div className="fl">EMERGING RISK EXPOSURE</div>
+              <div className="ft">Tariff & trade-policy escalation</div>
+              <div className="fr">
+                Brightwell plc's raw material supply lines intersect with the widened US tariff list.
+              </div>
+            </div>
+
+            <div className="float-score">
+              <span className="s">84</span>
+              <span className="sl">Relevance</span>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Interactive Prism Visualization */}
-        <div className="prism-visualization">
-          <svg className="prism-svg" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <filter id="glow-red" x="-10%" y="-10%" width="120%" height="120%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <filter id="glow-blue" x="-10%" y="-10%" width="120%" height="120%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <filter id="glow-green" x="-10%" y="-10%" width="120%" height="120%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <filter id="glow-purple" x="-10%" y="-10%" width="120%" height="120%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <filter id="glow-white" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
+      {/* TRUST */}
+      <section className="trust">
+        <div className="wrap">
+          <div className="trust-label">Continuous ingestion across global regulatory & intelligence feeds</div>
+          <div className="trust-row">
+            <span className="source-pill">Reuters</span>
+            <span className="source-pill">Bloomberg</span>
+            <span className="source-pill">Financial Times</span>
+            <span className="source-pill">SEC / EDGAR</span>
+            <span className="source-pill">EU Official Journal</span>
+            <span className="source-pill">OFAC</span>
+            <span className="source-pill">Federal Reserve</span>
+          </div>
+        </div>
+      </section>
 
-            {/* Laser Line Groups */}
+      {/* TAXONOMY */}
+      <section className="wrap" id="taxonomy" style={{ padding: "60px 28px" }}>
+        <div className="eyebrow" style={{ textAlign: "center", marginBottom: 12 }}>
+          Analytical framework
+        </div>
+        <h2 className="serif" style={{ fontSize: 32, textAlign: "center", fontWeight: 600, marginBottom: 14 }}>
+          The Eight Risk Lenses
+        </h2>
+        <p style={{ textAlign: "center", color: "var(--text2)", maxWidth: 540, margin: "0 auto 36px", fontSize: 14 }}>
+          Our intelligence pipeline classifies unstructured signals into a consistent corporate taxonomy
+          to run matching models.
+        </p>
 
-            {/* 1. Incoming World Data Beam (White) */}
-            <path 
-              d="M0 200 H360" 
-              className={`laser-beam beam-world ${hoveredSection === "world" ? "active" : ""}`}
-              stroke="url(#grad-white)"
-              strokeWidth={hoveredSection === "world" ? "3" : "1.5"}
-              filter="url(#glow-white)"
-            />
-            {/* Interactive Area for World Feed */}
-            <line 
-              x1="0" y1="180" x2="350" y2="180" 
-              stroke="transparent" strokeWidth="40" 
-              className="cursor-pointer"
-              onMouseEnter={() => { setHoveredSection("world"); setActiveTab("world"); }}
-              onMouseLeave={() => setHoveredSection(null)}
-            />
-
-            {/* 2. Refracted Domain Laser Beams */}
-            {/* Geopolitical (Red) */}
-            <path 
-              d="M440 200 C500 200, 520 110, 800 110" 
-              className={`laser-beam beam-geo ${hoveredSection === "intersection" ? "active" : ""}`}
-              stroke="var(--red)"
-              strokeWidth={hoveredSection === "intersection" ? "3.5" : "1.5"}
-              filter="url(#glow-red)"
-            />
-            {/* Regulatory (Blue) */}
-            <path 
-              d="M440 200 C500 200, 520 170, 800 170" 
-              className={`laser-beam beam-reg ${hoveredSection === "intersection" ? "active" : ""}`}
-              stroke="var(--accent)"
-              strokeWidth={hoveredSection === "intersection" ? "3.5" : "1.5"}
-              filter="url(#glow-blue)"
-            />
-            {/* Environmental (Green) */}
-            <path 
-              d="M440 200 C500 200, 520 230, 800 230" 
-              className={`laser-beam beam-env ${hoveredSection === "intersection" ? "active" : ""}`}
-              stroke="var(--green)"
-              strokeWidth={hoveredSection === "intersection" ? "3.5" : "1.5"}
-              filter="url(#glow-green)"
-            />
-            {/* Tech & AI (Purple) */}
-            <path 
-              d="M440 200 C500 200, 520 290, 800 290" 
-              className={`laser-beam beam-tech ${hoveredSection === "intersection" ? "active" : ""}`}
-              stroke="var(--purple)"
-              strokeWidth={hoveredSection === "intersection" ? "3.5" : "1.5"}
-              filter="url(#glow-purple)"
-            />
-            {/* Interactive Area for Refractions */}
-            <path 
-              d="M450 200 C550 200, 550 200, 800 200" 
-              stroke="transparent" strokeWidth="150" 
-              className="cursor-pointer"
-              onMouseEnter={() => { setHoveredSection("intersection"); setActiveTab("intersection"); }}
-              onMouseLeave={() => setHoveredSection(null)}
-            />
-
-            {/* 3. Central Crystal Prism (Your World) */}
-            <g 
-              className={`prism-group ${hoveredSection === "prism" ? "active" : ""}`}
-              onMouseEnter={() => { setHoveredSection("prism"); setActiveTab("prism"); }}
-              onMouseLeave={() => setHoveredSection(null)}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+          {[
+            { id: "geo", title: "Geopolitical & Sanctions", desc: "Conflict escalation, diplomatic friction, asset designations, and export controls." },
+            { id: "trade", title: "Trade & Supply Chain", desc: "Tariffs, reciprocal duties, transit choke points, and critical raw material restrictions." },
+            { id: "reg", title: "Regulatory & Compliance", desc: "Corporate governance acts, disclosure compliance mandates, and reporting duties." },
+            { id: "fin", title: "Financial & Market", desc: "Macro inflation, interest rate shifts, refinancing stress, and margin compressions." },
+            { id: "tech", title: "Technology & Cyber", desc: "Generative AI policy limits, cloud outages, third-party breaches, and ransomware." },
+            { id: "clim", title: "Climate & Environmental", desc: "Physical water scarcity, supply region droughts, biodiversity stress, and carbon taxes." },
+            { id: "soc", title: "Social & Conduct", desc: "Labour practices, supply chain human rights reviews, and brand reputational shifts." },
+            { id: "legal", title: "Legal & Litigation", desc: "Contract disputes, class action liabilities, regulatory fines, and court rulings." },
+          ].map((tax) => (
+            <div
+              key={tax.id}
+              className="panel"
+              style={{
+                borderTop: `3px solid var(--d-${tax.id})`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
             >
-              {/* Glow Behind Prism */}
-              <polygon 
-                points="400,140 440,200 400,260 360,200" 
-                fill="rgba(78, 205, 196, 0.05)"
-                stroke="transparent"
-              />
-              {/* Outer Hex Crystal Shape */}
-              <polygon 
-                points="400,130 450,200 400,270 350,200" 
-                className="prism-body"
-                stroke={hoveredSection === "prism" ? "#4ecdc4" : "rgba(255,255,255,0.25)"}
-                strokeWidth={hoveredSection === "prism" ? "2" : "1"}
-                fill="rgba(10, 20, 35, 0.65)"
-              />
-              {/* Facet Lines */}
-              <line x1="400" y1="130" x2="400" y2="270" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
-              <line x1="350" y1="200" x2="450" y2="200" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
-            </g>
-
-            {/* Labels and Callouts */}
-            <text x="180" y="170" fill="rgba(255,255,255,0.5)" fontSize="10.5" fontWeight="600" letterSpacing="1" textAnchor="middle">THE WORLD</text>
-            <text x="180" y="150" fill={hoveredSection === "world" ? "#ffffff" : "rgba(255,255,255,0.3)"} fontSize="12" fontWeight="700" letterSpacing="1.5" textAnchor="middle">RAW DATA BEAM</text>
-            
-            <text x="400" y="110" fill={hoveredSection === "prism" ? "#4ecdc4" : "rgba(255,255,255,0.4)"} fontSize="12" fontWeight="700" letterSpacing="1.5" textAnchor="middle">YOUR ORGANISATION</text>
-            <text x="400" y="295" fill="rgba(255,255,255,0.5)" fontSize="11" fontWeight="600" letterSpacing="1" textAnchor="middle">RISK PRISM</text>
-
-            <text x="620" y="80" fill="rgba(255,255,255,0.5)" fontSize="10.5" fontWeight="600" letterSpacing="1">THE INTERSECTION</text>
-            <text x="620" y="60" fill={hoveredSection === "intersection" ? "#ffffff" : "rgba(255,255,255,0.3)"} fontSize="12" fontWeight="700" letterSpacing="1.5">REFRACTED INSIGHTS</text>
-
-            {/* Gradients */}
-            <linearGradient id="grad-white" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0.8)" />
-            </linearGradient>
-          </svg>
-
-          {/* Interactive Info Cards */}
-          <div className="prism-cards-container">
-            <div className="landing-tabs-header">
-              <button 
-                className={`lt-btn ${activeTab === "world" ? "active" : ""}`}
-                onClick={() => setActiveTab("world")}
-              >
-                1. The World (Input)
-              </button>
-              <button 
-                className={`lt-btn ${activeTab === "prism" ? "active" : ""}`}
-                onClick={() => setActiveTab("prism")}
-              >
-                2. Your World (Filter)
-              </button>
-              <button 
-                className={`lt-btn ${activeTab === "intersection" ? "active" : ""}`}
-                onClick={() => setActiveTab("intersection")}
-              >
-                3. Refracted Output
-              </button>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{tax.title}</div>
+              <p style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.5 }}>{tax.desc}</p>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="landing-tab-body">
-              {activeTab === "world" && (
-                <div className="landing-card-info">
-                  <div className="lc-header text-white font-serif text-lg mb-2">
-                    The World: Unstructured Signal Stream
-                  </div>
-                  <p className="text-slate-400 text-xs leading-relaxed mb-4">
-                    RiskLens listens to a constant influx of global developments across regulator networks, primary news outlets, and trade databases. We process thousands of inputs concurrently.
-                  </p>
-                  <div className="lc-sources flex flex-wrap gap-2.5">
-                    <span className="source-pill">SEC EDGAR</span>
-                    <span className="source-pill">FCA Filings</span>
-                    <span className="source-pill">Reuters</span>
-                    <span className="source-pill">Bloomberg</span>
-                    <span className="source-pill">FMCG Trade Journals</span>
-                  </div>
-                </div>
-              )}
+      {/* HOW IT WORKS */}
+      <section style={{ background: "var(--bg2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "60px 0" }} id="how-it-works">
+        <div className="wrap">
+          <div className="eyebrow" style={{ textAlign: "center", marginBottom: 12 }}>
+            Methodology
+          </div>
+          <h2 className="serif" style={{ fontSize: 32, textAlign: "center", fontWeight: 600, marginBottom: 36 }}>
+            How RiskLens Works
+          </h2>
 
-              {activeTab === "prism" && (
-                <div className="landing-card-info">
-                  <div className="lc-header text-white font-serif text-lg mb-2">
-                    Your World: Organizational Prism
-                  </div>
-                  <p className="text-slate-400 text-xs leading-relaxed mb-4">
-                    The central prism is built on your exact corporate metadata. By modeling your company parameters, the platform filters out global noise and focuses strictly on matches that trigger your vulnerabilities.
-                  </p>
-                  <div className="lc-sources flex flex-wrap gap-2.5">
-                    <span className="source-pill border border-emerald-500/20 text-emerald-400">Sector &amp; Peers</span>
-                    <span className="source-pill border border-emerald-500/20 text-emerald-400">Appetite Limits</span>
-                    <span className="source-pill border border-emerald-500/20 text-emerald-400">Geographic Exposures</span>
-                    <span className="source-pill border border-emerald-500/20 text-emerald-400">Critical Commodities</span>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "intersection" && (
-                <div className="landing-card-info">
-                  <div className="lc-header text-white font-serif text-lg mb-2">
-                    The Refracted Intersection: Aligned Exposure
-                  </div>
-                  <p className="text-slate-400 text-xs leading-relaxed mb-4">
-                    Chaotic data is refracted into clean, actionable channels. Our 4-stage pipeline maps signal relevance to your risk register, benchmarks peer disclosure transparency, and autogenerates board-ready print briefs.
-                  </p>
-                  <div className="lc-sources flex flex-wrap gap-2.5">
-                    <span className="source-pill border border-indigo-400/20 text-indigo-300">Semantic Embedding Match</span>
-                    <span className="source-pill border border-indigo-400/20 text-indigo-300">ERM Register Mapping</span>
-                    <span className="source-pill border border-indigo-400/20 text-indigo-300">A4 Print Board Packs</span>
-                  </div>
-                </div>
-              )}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 32 }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ display: "inline-flex", width: 44, height: 44, borderRadius: "50%", background: "var(--accent-l)", color: "var(--accent)", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>
+                1
+              </div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Ingest & Enrich</h3>
+              <p style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.6 }}>
+                Scrapes thousands of articles daily. Classifies each signal for domain, impact level,
+                and sentiment using LLM parsing.
+              </p>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ display: "inline-flex", width: 44, height: 44, borderRadius: "50%", background: "var(--accent-l)", color: "var(--accent)", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>
+                2
+              </div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Semantic Matching</h3>
+              <p style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.6 }}>
+                Computes vector embeddings to match incoming signals against your disclosed risks,
+                peer filings, and supply chain footprint.
+              </p>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ display: "inline-flex", width: 44, height: 44, borderRadius: "50%", background: "var(--accent-l)", color: "var(--accent)", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>
+                3
+              </div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Board Synthesis</h3>
+              <p style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.6 }}>
+                Synthesizes exposure against board appetites, calculates peer disclosure gaps, and
+                compiles printable board packs.
+              </p>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Dynamic CTA Footer Section */}
-        <div className="landing-action-row">
-          <button className="landing-btn-enter font-semibold" onClick={onLaunchPlatform}>
-            Launch RiskLens Dashboard
-            <ArrowRight size={16} className="ml-1.5" />
+      {/* ACTION BAND */}
+      <section style={{ padding: "60px 0", textAlign: "center" }}>
+        <div className="wrap">
+          <h2 className="serif" style={{ fontSize: 26, fontWeight: 600, marginBottom: 12 }}>
+            Ready to review your risk posture?
+          </h2>
+          <p style={{ color: "var(--text2)", marginBottom: 24, fontSize: 13.5 }}>
+            Unlock emerging risk matching and peer disclosure benchmarking in under 10 seconds.
+          </p>
+          <button className="btn btn-primary btn-lg" onClick={onLaunchPlatform}>
+            Launch platform workspace <Icon name="arrowR" size={16} color="#fff" />
           </button>
         </div>
-      </main>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ borderTop: "1px solid var(--border)", padding: "26px 0", fontSize: 11, color: "var(--text3)", background: "var(--bg2)" }}>
+        <div className="wrap" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            &copy; {new Date().getFullYear()} EY RiskLens. All rights reserved. Editorial prototype.
+          </div>
+          <div style={{ display: "flex", gap: 16 }}>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">EY Global Risk Consulting</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
