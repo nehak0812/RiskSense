@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organisation {
+  id               String        @id @default(uuid())
+  name             String
+  industry         String
+  geographies      String        // JSON array of strings e.g. '["US", "EU"]'
+  commodities      String        // JSON array of strings e.g. '["Palm Oil", "Cocoa"]'
+  peers            String        // JSON array of strings e.g. '["Nestle", "Danone"]'
+  createdAt        DateTime      @default(now())
+  appetites        RiskAppetite[]
+  matches          SignalMatch[]
+  risks            Risk[]
+  boardPacks       BoardPack[]
+  peerDisclosures  PeerDisclosure[]
+}
+
+model RiskAppetite {
+  id                String       @id @default(uuid())
+  organisationId    String
+  organisation      Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  domain            String       // Geopolitical, Regulatory, Technology & AI, Environmental, Macro, Industry, Supply chain, Financial
+  appetiteThreshold Float        // 0 - 100
+  setBy             String
+  effectiveDate     DateTime
+}
+
+model Signal {
+  id             String        @id @default(uuid())
+  source         String        // e.g. "Reuters", "SEC"
+  url            String        @unique
+  publishedAt    DateTime
+  title          String
+  summary        String
+  body           String
+  domain         String        // Geopolitical, Regulatory, Technology & AI, Environmental, Macro, Industry, Supply chain, Financial
+  sentiment      String        // Alarm, Concern, Watch, Stable, Easing
+  impact         String        // High, Medium, Low
+  entities       String        // JSON array of strings
+  regulations    String        // JSON array of strings
+  geographies    String        // JSON array of strings
+  embeddingString String?      // JSON array of floats for vector matching in-memory
+  confidence     Float
+  sourcesCited   String        // JSON array of strings
+  matches        SignalMatch[]
+}
+
+model SignalMatch {
+  id             String        @id @default(uuid())
+  signalId       String
+  signal         Signal        @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  organisationId String
+  organisation   Organisation  @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  relevanceScore Float
+  linkedRiskIds  String        // JSON array of strings
+  matchedAt      DateTime      @default(now())
+}
+
+model Risk {
+  id                   String             @id @default(uuid())
+  organisationId       String
+  organisation         Organisation       @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  code                 String             // e.g. RR-01
+  title                String
+  category             String
+  ownerRole            String
+  ownerName            String
+  inherentRating       String             // H/M/L
+  controlEffectiveness String             // Adequate/Partial/Limited
+  residualRating       String             // H/M/L
+  appetiteStatus       String             // Within/AtTolerance/Breach
+  score                Float              // 0-10
+  trendDirection       String             // Up, Down, Stable
+  trendValue           Float
+  horizon              String             // near, med, long
+  isPrincipal          Boolean            @default(false)
+  peerGap              Boolean            @default(false)
+  lastReviewedAt       DateTime
+  nextReviewAt         DateTime
+  history              RiskScoreHistory[]
+  kris                 KRI[]
+  actions              Action[]
+}
+
+model RiskScoreHistory {
+  id        String   @id @default(uuid())
+  riskId    String
+  risk      Risk     @relation(fields: [riskId], references: [id], onDelete: Cascade)
+  asOf      DateTime
+  score     Float
+  sentiment String
+}
+
+model KRI {
+  id           String  @id @default(uuid())
+  riskId       String
+  risk         Risk    @relation(fields: [riskId], references: [id], onDelete: Cascade)
+  label        String
+  threshold    Float
+  currentValue Float
+  breached     Boolean
+}
+
+model PeerDisclosure {
+  id             String   @id @default(uuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  peerName       String
+  theme          String
+  disclosed      Boolean
+  source         String
+  asOf           DateTime
+}
+
+model Action {
+  id          String   @id @default(uuid())
+  riskId      String
+  risk        Risk     @relation(fields: [riskId], references: [id], onDelete: Cascade)
+  description String
+  status      String   // on-track, at-risk, overdue
+  dueAt       DateTime
+  owner       String
+}
+
+model BoardPack {
+  id             String       @id @default(uuid())
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  periodLabel    String       // e.g. "Q2 2026"
+  posture        String       // Low, Moderate, Elevated, Severe
+  generatedAt    DateTime     @default(now())
+  payload        String       // JSON string of all details for display/export
+}
