@@ -10,8 +10,9 @@ const REPORTS = [
     mark: "WEF",
     markColor: "var(--teal)",
     title: "Global Risks Report 2026",
-    date: "Jan 2026",
+    date: "Jan 14, 2026",
     horizon: "2-year",
+    url: "https://www.weforum.org/publications/global-risks-report-2026/",
     topRisks: ["Geopolitical confrontation", "Misinformation & AI", "Extreme weather", "Economic downturn"],
     summary:
       'Frames a "polycrisis" in which geopolitical, technological and environmental risks compound. Short-term concern centres on state-based conflict and AI-driven misinformation; the 10-year outlook is dominated by environmental risks.',
@@ -22,9 +23,10 @@ const REPORTS = [
     publisher: "International Monetary Fund",
     mark: "IMF",
     markColor: "var(--accent)",
-    title: "World Economic Outlook Update",
-    date: "Apr 2026",
+    title: "World Economic Outlook, April 2026",
+    date: "Apr 14, 2026",
     horizon: "12-month",
+    url: "https://www.imf.org/en/Publications/WEO/Issues/2026/04/14/world-economic-outlook-april-2026",
     topRisks: ["Trade fragmentation", "Sticky inflation", "Sovereign debt stress", "Financial-sector strain"],
     summary:
       "Warns that trade fragmentation and tariff escalation could shave global output and re-anchor inflation higher. Highlights debt-service pressure in emerging markets and pockets of non-bank financial vulnerability.",
@@ -36,8 +38,9 @@ const REPORTS = [
     mark: "WB",
     markColor: "var(--green)",
     title: "Global Economic Prospects",
-    date: "Jan 2026",
+    date: "Jan 13, 2026",
     horizon: "24-month",
+    url: "https://hdl.handle.net/10986/44034",
     topRisks: ["Trade-policy uncertainty", "Climate shocks", "Debt distress", "Weak investment"],
     summary:
       "Emphasises that trade-policy uncertainty and climate-related shocks are the dominant drags on emerging-market growth, with under-investment compounding long-run vulnerability.",
@@ -48,9 +51,10 @@ const REPORTS = [
     publisher: "Deloitte",
     mark: "D",
     markColor: "var(--d-fin)",
-    title: "Global Risk & Resilience Outlook",
-    date: "Mar 2026",
+    title: "2026 Internal Audit Hot Topics",
+    date: "Jan 29, 2026",
     horizon: "18-month",
+    url: "https://www.deloitte.com/us/en/insights.html",
     topRisks: ["Cyber & AI risk", "Regulatory complexity", "Supply-chain concentration", "Talent"],
     summary:
       "Identifies cyber and AI-governance risk as the fastest-rising board concern, alongside mounting regulatory complexity across jurisdictions and concentration risk in critical suppliers.",
@@ -61,9 +65,10 @@ const REPORTS = [
     publisher: "PwC",
     mark: "PwC",
     markColor: "var(--d-trade)",
-    title: "Global Risk Survey 2026",
-    date: "Feb 2026",
+    title: "PwC 2026 Global CEO Survey",
+    date: "Jan 19, 2026",
     horizon: "12-month",
+    url: "https://www.pwc.com/gx/en/issues/c-suite-insights/ceo-survey-2026.html",
     topRisks: ["Inflation & macro", "Cyber", "Digital & technology", "Regulatory change"],
     summary:
       "Survey of risk leaders places macro-economic volatility and cyber threats at the top of the near-term agenda, with a growing share treating AI as both an opportunity and an emerging risk.",
@@ -74,9 +79,10 @@ const REPORTS = [
     publisher: "McKinsey & Company",
     mark: "McK",
     markColor: "var(--d-tech)",
-    title: "Global Risk Pulse",
-    date: "Apr 2026",
+    title: "McKinsey on Risk & Resilience (Number 20)",
+    date: "Nov 2025",
     horizon: "12-month",
+    url: "https://www.mckinsey.com/capabilities/risk-and-resilience/our-insights",
     topRisks: ["Geopolitical risk", "AI disruption", "Energy transition", "Supply resilience"],
     summary:
       "Argues geopolitical risk has become a permanent strategic variable and that AI adoption is reshaping both opportunity and operational-risk profiles, requiring scenario-based resilience planning.",
@@ -87,9 +93,10 @@ const REPORTS = [
     publisher: "KPMG",
     mark: "KPMG",
     markColor: "var(--d-soc)",
-    title: "Global Board Risk Survey",
-    date: "Mar 2026",
+    title: "Global Third-Party Risk Management Survey 2026",
+    date: "Mar 2, 2026",
     horizon: "18-month",
+    url: "https://home.kpmg/xx/en/home/insights/2026/03/global-third-party-risk-management-survey-2026.html",
     topRisks: ["Regulatory & compliance", "Cyber", "ESG & climate", "Reputational"],
     summary:
       "Finds boards elevating regulatory and ESG-disclosure readiness as a top oversight priority, with cyber and reputational risk close behind amid faster information propagation.",
@@ -100,9 +107,10 @@ const REPORTS = [
     publisher: "BCG",
     mark: "BCG",
     markColor: "var(--d-clim)",
-    title: "Resilience & Risk Index",
-    date: "Feb 2026",
+    title: "Trade in Transition: How to Prepare for a Patchwork World Order",
+    date: "Jan 8, 2026",
     horizon: "24-month",
+    url: "https://www.bcg.com/publications/2026/trade-in-transition-patchwork-world-order",
     topRisks: ["Supply-chain resilience", "Geopolitics", "Climate transition", "Tech disruption"],
     summary:
       "Stresses building structural supply-chain resilience against a backdrop of geopolitical fragmentation and accelerating climate-transition requirements.",
@@ -328,7 +336,11 @@ export default function ThoughtLeaders() {
         {/* report cards */}
         <div className="report-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
           {reports.map((r) => (
-            <div className="report-card fade-up" key={r.id}>
+            <div
+              className="report-card fade-up"
+              key={r.id}
+              onClick={() => window.open(r.url, "_blank", "noopener,noreferrer")}
+            >
               <div className="report-head" style={{ display: "flex", gap: 10, marginBottom: 12 }}>
                 <div
                   className="report-mark"
