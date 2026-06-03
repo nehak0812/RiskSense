@@ -54,6 +54,46 @@ const INDUSTRIES = [
   "Automotive & Manufacturing",
 ];
 
+const COUNTRIES_LIST = [
+  "United States",
+  "United Kingdom",
+  "Germany",
+  "France",
+  "Japan",
+  "China",
+  "Canada",
+  "Australia",
+  "Switzerland",
+  "Netherlands",
+  "Sweden",
+  "Saudi Arabia",
+  "India",
+  "Brazil",
+  "Singapore",
+  "Spain",
+  "Italy",
+  "Norway",
+  "Ireland",
+  "South Korea",
+  "Mexico",
+  "Belgium",
+  "Denmark",
+  "Finland",
+  "South Africa",
+];
+
+const PEER_OPTIONS_BY_INDUSTRY: Record<string, string[]> = {
+  "Consumer Health & FMCG": ["Unilever", "Nestlé", "Procter & Gamble", "Reckitt", "Danone", "Haleon", "Mondelēz", "L'Oréal", "Colgate-Palmolive", "Johnson & Johnson", "Tesco", "Walmart", "Kroger", "Costco"],
+  "Banking & Financial Services": ["JPMorgan Chase", "Goldman Sachs", "Morgan Stanley", "Citigroup", "Bank of America", "Barclays", "HSBC", "Lloyds", "NatWest", "Standard Chartered", "UBS", "BNP Paribas", "Deutsche Bank"],
+  "Integrated Energy": ["Saudi Aramco", "Shell", "ExxonMobil", "Chevron", "BP", "TotalEnergies", "Eni", "Equinor", "Caldera Energy Group"],
+  "Transport & Logistics": ["DHL", "FedEx", "UPS", "DSV", "Maersk", "DP World", "Kuehne + Nagel", "Northwind Logistics"],
+  "Pharmaceuticals": ["AstraZeneca", "GSK", "Pfizer", "Novartis", "Roche", "Sanofi", "Merck", "Eli Lilly", "Johnson & Johnson", "Bayer", "Veridian Pharma"],
+  "Diversified Industrials": ["Siemens", "General Electric", "ABB", "Schneider Electric", "Honeywell", "Caterpillar", "3M", "Aboukir Industries"],
+  "Technology & Telecom": ["Apple", "Microsoft", "Google", "Meta", "Amazon", "Samsung", "Sony", "TSMC", "Intel", "Nvidia", "Cisco", "Oracle", "Salesforce", "T-Mobile", "AT&T"],
+  "Retail & E-commerce": ["Amazon", "Walmart", "Target", "Costco", "eBay", "Alibaba", "JD.com", "Home Depot", "Carrefour"],
+  "Automotive & Manufacturing": ["Toyota", "Volkswagen", "Ford", "General Motors", "Honda", "Hyundai", "Tesla", "BMW", "Mercedes-Benz", "Stellantis"],
+};
+
 interface GatewayProps {
   onSelect: (org: any) => void;
 }
@@ -78,12 +118,11 @@ export default function Gateway({ onSelect }: GatewayProps) {
   // Form fields
   const [formName, setFormName] = useState("");
   const [formIndustry, setFormIndustry] = useState("Consumer Health & FMCG");
-  const [formGeographies, setFormGeographies] = useState("United States, United Kingdom");
-  const [formPeers, setFormPeers] = useState("Competitor A, Competitor B");
+  const [formGeographies, setFormGeographies] = useState<string[]>(["United States", "United Kingdom"]);
+  const [formPeers, setFormPeers] = useState<string[]>(["Competitor A", "Competitor B"]);
 
-  // Input editability states
+  // Input editability states - locking Name by default, edit next to each of the three fields
   const [editable, setEditable] = useState({
-    name: false,
     industry: false,
     geographies: false,
     peers: false,
@@ -162,6 +201,11 @@ export default function Gateway({ onSelect }: GatewayProps) {
     return list;
   }, [formIndustry]);
 
+  // Dynamically calculate competitor suggestions based on the chosen industry
+  const peerOptions = React.useMemo(() => {
+    return PEER_OPTIONS_BY_INDUSTRY[formIndustry] || FORBES_2000.map(o => o.name);
+  }, [formIndustry]);
+
   const handleSelectCompany = async (company: any) => {
     setIsScanning(true);
     setScanStep(0);
@@ -170,7 +214,6 @@ export default function Gateway({ onSelect }: GatewayProps) {
 
     // Reset editable toggles
     setEditable({
-      name: false,
       industry: false,
       geographies: false,
       peers: false,
@@ -214,16 +257,23 @@ export default function Gateway({ onSelect }: GatewayProps) {
 
       setFormName(data.name || company.name);
       setFormIndustry(data.industry || company.industry || "Consumer Health & FMCG");
-      setFormGeographies(
-        Array.isArray(data.geographies)
-          ? data.geographies.join(", ")
-          : "United States, United Kingdom"
-      );
-      setFormPeers(
-        Array.isArray(data.peers)
-          ? data.peers.join(", ")
-          : "Competitor A, Competitor B"
-      );
+      
+      let geos: string[] = ["United States", "United Kingdom"];
+      if (Array.isArray(data.geographies)) {
+        geos = data.geographies;
+      } else if (typeof data.geographies === "string") {
+        geos = data.geographies.split(",").map((x: string) => x.trim()).filter(Boolean);
+      }
+      setFormGeographies(geos);
+
+      let peers: string[] = ["Competitor A", "Competitor B"];
+      if (Array.isArray(data.peers)) {
+        peers = data.peers;
+      } else if (typeof data.peers === "string") {
+        peers = data.peers.split(",").map((x: string) => x.trim()).filter(Boolean);
+      }
+      setFormPeers(peers);
+
       setIsScanning(false);
       setShowFormDetails(true);
     } catch (err) {
@@ -240,8 +290,8 @@ export default function Gateway({ onSelect }: GatewayProps) {
       
       setFormName(company.name);
       setFormIndustry(preset?.industry || "Consumer Health & FMCG");
-      setFormGeographies(preset?.geographies.join(", ") || "United States, United Kingdom");
-      setFormPeers(preset?.peers.join(", ") || "Competitor A, Competitor B");
+      setFormGeographies(preset?.geographies || ["United States", "United Kingdom"]);
+      setFormPeers(preset?.peers || ["Competitor A", "Competitor B"]);
       setIsScanning(false);
       setShowFormDetails(true);
     }
@@ -305,8 +355,8 @@ export default function Gateway({ onSelect }: GatewayProps) {
       id: "temp-onboarding-id",
       name: formName,
       industry: formIndustry,
-      geographies: JSON.stringify(formGeographies.split(",").map((x) => x.trim()).filter(Boolean)),
-      peers: JSON.stringify(formPeers.split(",").map((x) => x.trim()).filter(Boolean)),
+      geographies: JSON.stringify(formGeographies),
+      peers: JSON.stringify(formPeers),
       commodities: JSON.stringify(["None"]),
       meta: `Scanned Footprint · Headquartered Global`,
       featured: false,
@@ -560,35 +610,30 @@ export default function Gateway({ onSelect }: GatewayProps) {
                 Scanned Profile Settings
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
-                      Organisation Name
-                    </label>
-                    <ChangeToggle isEditing={editable.name} onToggle={() => setEditable(p => ({ ...p, name: !p.name }))} />
-                  </div>
-                  <input
-                    type="text"
-                    className="select"
-                    style={{
-                      width: "100%",
-                      height: 38,
-                      padding: "0 10px",
-                      border: "1px solid var(--border2)",
-                      background: editable.name ? "var(--bg1)" : "var(--bg3)",
-                      color: "var(--text1)",
-                      borderRadius: 6,
-                      transition: "all 0.2s ease",
-                      borderColor: editable.name ? "var(--accent)" : "var(--border2)"
-                    }}
-                    placeholder="e.g. Unilever plc"
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    disabled={!editable.name}
-                    required
-                  />
-                </div>
+              {/* Organisation Name - locked to search selection */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
+                  Organisation Name
+                </label>
+                <input
+                  type="text"
+                  className="select"
+                  style={{
+                    width: "100%",
+                    height: 38,
+                    padding: "0 10px",
+                    border: "1px solid var(--border2)",
+                    background: "var(--bg3)",
+                    color: "var(--text1)",
+                    borderRadius: 6,
+                  }}
+                  value={formName}
+                  disabled
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
+                {/* 1. Industry Classification dropdown */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
@@ -622,60 +667,164 @@ export default function Gateway({ onSelect }: GatewayProps) {
                 </div>
               </div>
 
+              {/* 2. Primary Geographies - chips list with dropdown selector */}
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
-                    Primary Geographies (countries, comma separated)
+                    Primary Geographies (countries)
                   </label>
                   <ChangeToggle isEditing={editable.geographies} onToggle={() => setEditable(p => ({ ...p, geographies: !p.geographies }))} />
                 </div>
-                <input
-                  type="text"
-                  className="select"
-                  style={{
-                    width: "100%",
-                    height: 38,
-                    padding: "0 10px",
-                    border: "1px solid var(--border2)",
-                    background: editable.geographies ? "var(--bg1)" : "var(--bg3)",
-                    color: "var(--text1)",
-                    borderRadius: 6,
-                    transition: "all 0.2s ease",
-                    borderColor: editable.geographies ? "var(--accent)" : "var(--border2)"
-                  }}
-                  placeholder="e.g. United States, United Kingdom, Japan"
-                  value={formGeographies}
-                  onChange={(e) => setFormGeographies(e.target.value)}
-                  disabled={!editable.geographies}
-                />
+                
+                <div style={{ 
+                  display: "flex", 
+                  flexWrap: "wrap", 
+                  gap: 6, 
+                  padding: "8px 10px", 
+                  border: "1px solid var(--border2)", 
+                  background: "var(--bg3)", 
+                  borderRadius: 6,
+                  minHeight: 38,
+                  alignItems: "center"
+                }}>
+                  {formGeographies.map((geo, idx) => (
+                    <span key={geo + "-" + idx} style={{ 
+                      display: "inline-flex", 
+                      alignItems: "center", 
+                      gap: 4, 
+                      background: "var(--bg1)", 
+                      border: "1px solid var(--border2)", 
+                      padding: "2px 8px", 
+                      borderRadius: 4, 
+                      fontSize: 12,
+                      color: "var(--text1)",
+                      fontWeight: 500
+                    }}>
+                      {geo}
+                      {editable.geographies && (
+                        <button 
+                          type="button" 
+                          onClick={() => setFormGeographies(prev => prev.filter((_, i) => i !== idx))}
+                          style={{ 
+                            background: "none", 
+                            border: "none", 
+                            color: "var(--accent)", 
+                            fontSize: 11, 
+                            cursor: "pointer", 
+                            padding: "0 0 0 2px", 
+                            fontWeight: "bold",
+                            lineHeight: 1
+                          }}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </span>
+                  ))}
+                  {formGeographies.length === 0 && (
+                    <span style={{ fontSize: 12, color: "var(--text3)" }}>No countries selected</span>
+                  )}
+                </div>
+
+                {editable.geographies && (
+                  <select
+                    className="select"
+                    style={{ width: "100%", height: 34, padding: "0 10px", border: "1px solid var(--border2)", background: "var(--bg1)", color: "var(--text1)", borderRadius: 6, fontSize: 12, marginTop: 4 }}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val && !formGeographies.includes(val)) {
+                        setFormGeographies(prev => [...prev, val]);
+                      }
+                      e.target.value = ""; // reset
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>+ Add Country...</option>
+                    {COUNTRIES_LIST.filter(c => !formGeographies.includes(c)).map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
+              {/* 3. Peer Benchmark Group - chips list with industry competitor dropdown selector */}
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
-                    Peer Benchmark Group (comma separated)
+                    Peer Benchmark Group (competitors)
                   </label>
                   <ChangeToggle isEditing={editable.peers} onToggle={() => setEditable(p => ({ ...p, peers: !p.peers }))} />
                 </div>
-                <input
-                  type="text"
-                  className="select"
-                  style={{
-                    width: "100%",
-                    height: 38,
-                    padding: "0 10px",
-                    border: "1px solid var(--border2)",
-                    background: editable.peers ? "var(--bg1)" : "var(--bg3)",
-                    color: "var(--text1)",
-                    borderRadius: 6,
-                    transition: "all 0.2s ease",
-                    borderColor: editable.peers ? "var(--accent)" : "var(--border2)"
-                  }}
-                  placeholder="e.g. Nestlé, P&G, Reckitt, Danone"
-                  value={formPeers}
-                  onChange={(e) => setFormPeers(e.target.value)}
-                  disabled={!editable.peers}
-                />
+
+                <div style={{ 
+                  display: "flex", 
+                  flexWrap: "wrap", 
+                  gap: 6, 
+                  padding: "8px 10px", 
+                  border: "1px solid var(--border2)", 
+                  background: "var(--bg3)", 
+                  borderRadius: 6,
+                  minHeight: 38,
+                  alignItems: "center"
+                }}>
+                  {formPeers.map((peer, idx) => (
+                    <span key={peer + "-" + idx} style={{ 
+                      display: "inline-flex", 
+                      alignItems: "center", 
+                      gap: 4, 
+                      background: "var(--bg1)", 
+                      border: "1px solid var(--border2)", 
+                      padding: "2px 8px", 
+                      borderRadius: 4, 
+                      fontSize: 12,
+                      color: "var(--text1)",
+                      fontWeight: 500
+                    }}>
+                      {peer}
+                      {editable.peers && (
+                        <button 
+                          type="button" 
+                          onClick={() => setFormPeers(prev => prev.filter((_, i) => i !== idx))}
+                          style={{ 
+                            background: "none", 
+                            border: "none", 
+                            color: "var(--accent)", 
+                            fontSize: 11, 
+                            cursor: "pointer", 
+                            padding: "0 0 0 2px", 
+                            fontWeight: "bold",
+                            lineHeight: 1
+                          }}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </span>
+                  ))}
+                  {formPeers.length === 0 && (
+                    <span style={{ fontSize: 12, color: "var(--text3)" }}>No peers selected</span>
+                  )}
+                </div>
+
+                {editable.peers && (
+                  <select
+                    className="select"
+                    style={{ width: "100%", height: 34, padding: "0 10px", border: "1px solid var(--border2)", background: "var(--bg1)", color: "var(--text1)", borderRadius: 6, fontSize: 12, marginTop: 4 }}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val && !formPeers.includes(val)) {
+                        setFormPeers(prev => [...prev, val]);
+                      }
+                      e.target.value = ""; // reset
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>+ Add Peer Company...</option>
+                    {peerOptions.filter(p => !formPeers.includes(p) && p.toLowerCase() !== formName.toLowerCase()).map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <button
