@@ -277,9 +277,9 @@ export default function DashboardShell({ onBackToLanding }: DashboardShellProps)
           }}
         >
           <div className="logo-gem">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 3 L21 8 L12 13 L3 8 Z" />
-              <path d="M3 8 V16 L12 21 L21 16 V8" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
+              <path d="M7 12h2l1.5-4 1.5 8 1.5-6 1.5 2h2" />
             </svg>
           </div>
           <div className="logo-name">
