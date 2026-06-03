@@ -262,15 +262,255 @@ interface CompanyInfo {
   peers: string[];
 }
 
-export async function fetchCompanyInfo(companyName: string): Promise<CompanyInfo> {
-  const defaultPayload: CompanyInfo = {
-    name: companyName,
-    industry: "Consumer Health & FMCG",
-    geographies: ["US", "EU", "UK"],
-    peers: ["Competitor A", "Competitor B", "Competitor C"],
+export async function fetchCompanyInfo(companyName: string, description: string = ""): Promise<CompanyInfo> {
+  const normName = companyName.toLowerCase();
+  
+  // High-fidelity fallback dictionary mapping names to precise industries, country-level geographies, and peers
+  const COMPANY_DICTIONARY: Record<string, Omit<CompanyInfo, "name">> = {
+    "astrazeneca": {
+      industry: "Pharmaceuticals",
+      geographies: ["United Kingdom", "Sweden", "United States", "Germany"],
+      peers: ["GSK", "Pfizer", "Novartis", "Roche", "Sanofi"]
+    },
+    "apple": {
+      industry: "Technology & Telecom",
+      geographies: ["United States", "China", "Taiwan", "Ireland"],
+      peers: ["Microsoft", "Google", "Samsung", "Sony"]
+    },
+    "microsoft": {
+      industry: "Technology & Telecom",
+      geographies: ["United States", "United Kingdom", "Germany", "Ireland"],
+      peers: ["Apple", "Google", "Amazon", "Oracle"]
+    },
+    "google": {
+      industry: "Technology & Telecom",
+      geographies: ["United States", "United Kingdom", "Germany", "Ireland"],
+      peers: ["Microsoft", "Apple", "Amazon", "Meta"]
+    },
+    "alphabet": {
+      industry: "Technology & Telecom",
+      geographies: ["United States", "United Kingdom", "Germany", "Ireland"],
+      peers: ["Microsoft", "Apple", "Amazon", "Meta"]
+    },
+    "meta": {
+      industry: "Technology & Telecom",
+      geographies: ["United States", "United Kingdom", "Germany", "Ireland"],
+      peers: ["Google", "ByteDance", "Snap", "Apple"]
+    },
+    "amazon": {
+      industry: "Retail & E-commerce",
+      geographies: ["United States", "United Kingdom", "Germany", "Japan"],
+      peers: ["Walmart", "Target", "eBay", "Alibaba"]
+    },
+    "jpmorgan": {
+      industry: "Banking & Financial Services",
+      geographies: ["United States", "United Kingdom", "Japan", "Singapore"],
+      peers: ["Bank of America", "Citigroup", "Goldman Sachs", "Morgan Stanley"]
+    },
+    "goldman sachs": {
+      industry: "Banking & Financial Services",
+      geographies: ["United States", "United Kingdom", "Japan", "Singapore"],
+      peers: ["Morgan Stanley", "JPMorgan Chase", "Citigroup", "Barclays"]
+    },
+    "aramco": {
+      industry: "Integrated Energy",
+      geographies: ["Saudi Arabia", "United States", "China", "Japan"],
+      peers: ["Shell", "ExxonMobil", "Chevron", "BP"]
+    },
+    "shell": {
+      industry: "Integrated Energy",
+      geographies: ["United Kingdom", "Netherlands", "United States", "Singapore"],
+      peers: ["Saudi Aramco", "ExxonMobil", "BP", "Chevron"]
+    },
+    "exxon": {
+      industry: "Integrated Energy",
+      geographies: ["United States", "United Kingdom", "Singapore", "Japan"],
+      peers: ["Chevron", "Shell", "BP", "Saudi Aramco"]
+    },
+    "bp plc": {
+      industry: "Integrated Energy",
+      geographies: ["United Kingdom", "United States", "Germany"],
+      peers: ["Shell", "ExxonMobil", "Chevron", "Saudi Aramco"]
+    },
+    "bp p.l.c.": {
+      industry: "Integrated Energy",
+      geographies: ["United Kingdom", "United States", "Germany"],
+      peers: ["Shell", "ExxonMobil", "Chevron", "Saudi Aramco"]
+    },
+    "unilever": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["United Kingdom", "Netherlands", "United States", "India"],
+      peers: ["Nestlé", "Procter & Gamble", "Reckitt", "Danone"]
+    },
+    "nestle": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["Switzerland", "United States", "France", "Germany"],
+      peers: ["Unilever", "Procter & Gamble", "Danone", "Mondelēz"]
+    },
+    "nestlé": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["Switzerland", "United States", "France", "Germany"],
+      peers: ["Unilever", "Procter & Gamble", "Danone", "Mondelēz"]
+    },
+    "novartis": {
+      industry: "Pharmaceuticals",
+      geographies: ["Switzerland", "United States", "Germany", "Japan"],
+      peers: ["Roche", "Pfizer", "Merck", "AstraZeneca"]
+    },
+    "brightwell": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["United Kingdom", "United States", "Germany"],
+      peers: ["Reckitt", "Haleon", "Unilever"]
+    },
+    "caldera": {
+      industry: "Integrated Energy",
+      geographies: ["United Kingdom", "Norway"],
+      peers: ["BP", "Shell", "TotalEnergies"]
+    },
+    "northwind": {
+      industry: "Transport & Logistics",
+      geographies: ["United Kingdom", "Germany", "France"],
+      peers: ["DHL", "FedEx", "DSV"]
+    },
+    "veridian": {
+      industry: "Pharmaceuticals",
+      geographies: ["United Kingdom", "United States"],
+      peers: ["GSK", "AstraZeneca", "Pfizer"]
+    },
+    "aboukir": {
+      industry: "Diversified Industrials",
+      geographies: ["United Kingdom", "Egypt"],
+      peers: ["Siemens", "General Electric", "Honeywell"]
+    },
+    "lvmh": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["France", "United States", "Italy", "Japan"],
+      peers: ["Kering", "Richemont", "Hermès", "Chanel"]
+    },
+    "toyota": {
+      industry: "Automotive & Manufacturing",
+      geographies: ["Japan", "United States", "China", "Germany"],
+      peers: ["Volkswagen", "Ford", "General Motors", "Honda"]
+    },
+    "volkswagen": {
+      industry: "Automotive & Manufacturing",
+      geographies: ["Germany", "China", "United States", "Brazil"],
+      peers: ["Toyota", "Ford", "Stellantis", "BMW"]
+    },
+    "siemens": {
+      industry: "Diversified Industrials",
+      geographies: ["Germany", "United States", "China", "India"],
+      peers: ["General Electric", "ABB", "Schneider Electric", "Honeywell"]
+    },
+    "gsk": {
+      industry: "Pharmaceuticals",
+      geographies: ["United Kingdom", "United States", "Belgium", "Germany"],
+      peers: ["AstraZeneca", "Pfizer", "Sanofi", "Novartis"]
+    },
+    "glaxosmithkline": {
+      industry: "Pharmaceuticals",
+      geographies: ["United Kingdom", "United States", "Belgium", "Germany"],
+      peers: ["AstraZeneca", "Pfizer", "Sanofi", "Novartis"]
+    },
+    "barclays": {
+      industry: "Banking & Financial Services",
+      geographies: ["United Kingdom", "United States", "Singapore", "Japan"],
+      peers: ["HSBC", "Lloyds", "NatWest", "Standard Chartered"]
+    },
+    "hsbc": {
+      industry: "Banking & Financial Services",
+      geographies: ["United Kingdom", "Hong Kong", "United States", "Singapore"],
+      peers: ["Citigroup", "Standard Chartered", "Barclays", "BNP Paribas"]
+    },
+    "tesco": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["United Kingdom", "Ireland"],
+      peers: ["Sainsbury's", "Asda", "Morrisons", "Aldi"]
+    }
   };
 
-  // 1. Tavily Search for background context
+  // 1. Try to find match in local dictionary first (covers standard cases instantly and accurately)
+  const dictKey = Object.keys(COMPANY_DICTIONARY).find(k => normName.includes(k));
+  let defaultPayload: CompanyInfo;
+
+  if (dictKey) {
+    const dictValue = COMPANY_DICTIONARY[dictKey];
+    defaultPayload = {
+      name: companyName,
+      ...dictValue
+    };
+  } else {
+    // Determine default industry based on Wikidata description keywords
+    let detectedIndustry = "Consumer Health & FMCG";
+    let detectedPeers = ["Competitor A", "Competitor B", "Competitor C"];
+    const descText = (description || "").toLowerCase();
+
+    if (descText.includes("bank") || descText.includes("financ") || descText.includes("insurance") || descText.includes("investment")) {
+      detectedIndustry = "Banking & Financial Services";
+      detectedPeers = ["JPMorgan Chase", "HSBC", "Goldman Sachs", "Bank of America"];
+    } else if (descText.includes("pharma") || descText.includes("drug") || descText.includes("biotech") || descText.includes("medical") || descText.includes("health")) {
+      detectedIndustry = "Pharmaceuticals";
+      detectedPeers = ["AstraZeneca", "GSK", "Pfizer", "Novartis", "Roche"];
+    } else if (descText.includes("oil") || descText.includes("gas") || descText.includes("petroleum") || descText.includes("energy") || descText.includes("power")) {
+      detectedIndustry = "Integrated Energy";
+      detectedPeers = ["Shell", "ExxonMobil", "Chevron", "BP", "Saudi Aramco"];
+    } else if (descText.includes("logistic") || descText.includes("shipping") || descText.includes("transport") || descText.includes("delivery") || descText.includes("cargo")) {
+      detectedIndustry = "Transport & Logistics";
+      detectedPeers = ["DHL", "FedEx", "DSV", "UPS", "Maersk"];
+    } else if (descText.includes("manufactur") || descText.includes("industrial") || descText.includes("steel") || descText.includes("machinery") || descText.includes("engine")) {
+      detectedIndustry = "Diversified Industrials";
+      detectedPeers = ["Siemens", "General Electric", "ABB", "Honeywell"];
+    } else if (descText.includes("software") || descText.includes("tech") || descText.includes("internet") || descText.includes("comput") || descText.includes("digital")) {
+      detectedIndustry = "Technology & Telecom";
+      detectedPeers = ["Microsoft", "Google", "Apple", "Meta", "Amazon"];
+    } else if (descText.includes("retail") || descText.includes("shop") || descText.includes("commerce") || descText.includes("store") || descText.includes("supermarket")) {
+      detectedIndustry = "Retail & E-commerce";
+      detectedPeers = ["Amazon", "Walmart", "Target", "Costco", "Alibaba"];
+    } else if (descText.includes("car") || descText.includes("automotive") || descText.includes("vehicle") || descText.includes("motor")) {
+      detectedIndustry = "Automotive & Manufacturing";
+      detectedPeers = ["Toyota", "Volkswagen", "Ford", "General Motors", "Honda"];
+    }
+
+    // Try to extract country from description
+    const geographies: string[] = [];
+    if (descText.includes("american") || descText.includes("u.s.") || descText.includes("united states")) {
+      geographies.push("United States");
+    }
+    if (descText.includes("british") || descText.includes("u.k.") || descText.includes("united kingdom")) {
+      geographies.push("United Kingdom");
+    }
+    if (descText.includes("german") || descText.includes("germany")) {
+      geographies.push("Germany");
+    }
+    if (descText.includes("french") || descText.includes("france")) {
+      geographies.push("France");
+    }
+    if (descText.includes("swiss") || descText.includes("switzerland")) {
+      geographies.push("Switzerland");
+    }
+    if (descText.includes("japanese") || descText.includes("japan")) {
+      geographies.push("Japan");
+    }
+    if (descText.includes("chinese") || descText.includes("china")) {
+      geographies.push("China");
+    }
+    if (descText.includes("swedish") || descText.includes("sweden")) {
+      geographies.push("Sweden");
+    }
+
+    if (geographies.length === 0) {
+      geographies.push("United States", "United Kingdom");
+    }
+
+    defaultPayload = {
+      name: companyName,
+      industry: detectedIndustry,
+      geographies,
+      peers: detectedPeers,
+    };
+  }
+
+  // 2. Tavily Search for background context
   let context = "";
   try {
     const query = `"${companyName}" corporate headquarters industry main competitors`;
@@ -283,7 +523,7 @@ export async function fetchCompanyInfo(companyName: string): Promise<CompanyInfo
   }
 
   if (!genAI) {
-    console.warn("Gemini AI API Key not configured. Returning default company details.");
+    console.warn("Gemini AI API Key not configured. Returning custom/dictionary default company details.");
     return defaultPayload;
   }
 
@@ -306,9 +546,12 @@ export async function fetchCompanyInfo(companyName: string): Promise<CompanyInfo
          - "Transport & Logistics"
          - "Pharmaceuticals"
          - "Diversified Industrials"
-         - If it doesn't fit any of the above, map it to a similar high-level clean industry name (e.g. "Technology & Telecom", "Automotive & Manufacturing", "Retail & E-commerce").
-      2. Primary Geographies: List of 2 to 4 major regions or countries of operation (e.g., ["US", "EU", "UK", "Global", "Asia"]).
-      3. Peer Benchmark Group: List of 3 to 5 top direct competitor companies.
+         - "Technology & Telecom"
+         - "Retail & E-commerce"
+         - "Automotive & Manufacturing"
+         - If it doesn't fit any of the above, map it to a similar high-level clean industry name.
+      2. Primary Geographies: List of 2 to 4 major countries of operation (e.g. ["United States", "United Kingdom", "Germany", "Japan"]). AVOID broad regional codes like "EU" or "Asia" — specify actual countries.
+      3. Peer Benchmark Group: List of 3 to 5 top direct competitor company names (do not use generic terms like "Competitor A").
 
       Format the response strictly as a JSON object matching this structure:
       {
@@ -324,13 +567,12 @@ export async function fetchCompanyInfo(companyName: string): Promise<CompanyInfo
     const cleanJson = JSON.parse(responseText.trim());
     return {
       name: cleanJson.name || companyName,
-      industry: cleanJson.industry || "Consumer Health & FMCG",
-      geographies: Array.isArray(cleanJson.geographies) ? cleanJson.geographies : ["Global"],
-      peers: Array.isArray(cleanJson.peers) ? cleanJson.peers : ["Competitor A", "Competitor B"],
+      industry: cleanJson.industry || defaultPayload.industry,
+      geographies: Array.isArray(cleanJson.geographies) ? cleanJson.geographies : defaultPayload.geographies,
+      peers: Array.isArray(cleanJson.peers) ? cleanJson.peers : defaultPayload.peers,
     };
   } catch (error) {
     console.error("Error getting company info with Gemini:", error);
     return defaultPayload;
   }
 }
-

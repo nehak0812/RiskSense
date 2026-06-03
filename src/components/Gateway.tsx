@@ -78,8 +78,16 @@ export default function Gateway({ onSelect }: GatewayProps) {
   // Form fields
   const [formName, setFormName] = useState("");
   const [formIndustry, setFormIndustry] = useState("Consumer Health & FMCG");
-  const [formGeographies, setFormGeographies] = useState("UK, EU, US");
-  const [formPeers, setFormPeers] = useState("Reckitt, Haleon, Unilever");
+  const [formGeographies, setFormGeographies] = useState("United States, United Kingdom");
+  const [formPeers, setFormPeers] = useState("Competitor A, Competitor B");
+
+  // Input editability states
+  const [editable, setEditable] = useState({
+    name: false,
+    industry: false,
+    geographies: false,
+    peers: false,
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -160,6 +168,14 @@ export default function Gateway({ onSelect }: GatewayProps) {
     setOpen(false);
     setQ(company.name);
 
+    // Reset editable toggles
+    setEditable({
+      name: false,
+      industry: false,
+      geographies: false,
+      peers: false,
+    });
+
     // Dynamic scanning step simulation
     let currentScanStep = 0;
     const scanInterval = setInterval(() => {
@@ -174,11 +190,11 @@ export default function Gateway({ onSelect }: GatewayProps) {
     const startTime = Date.now();
 
     try {
-      // Fire request to the company info search agent
+      // Fire request to the company info search agent, passing the entity description
       const res = await fetch("/api/company-info", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: company.name }),
+        body: JSON.stringify({ name: company.name, description: company.description || "" }),
       });
 
       let data;
@@ -201,7 +217,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
       setFormGeographies(
         Array.isArray(data.geographies)
           ? data.geographies.join(", ")
-          : "US, EU, UK"
+          : "United States, United Kingdom"
       );
       setFormPeers(
         Array.isArray(data.peers)
@@ -224,7 +240,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
       
       setFormName(company.name);
       setFormIndustry(preset?.industry || "Consumer Health & FMCG");
-      setFormGeographies(preset?.geographies.join(", ") || "US, EU, UK");
+      setFormGeographies(preset?.geographies.join(", ") || "United States, United Kingdom");
       setFormPeers(preset?.peers.join(", ") || "Competitor A, Competitor B");
       setIsScanning(false);
       setShowFormDetails(true);
@@ -349,6 +365,40 @@ export default function Gateway({ onSelect }: GatewayProps) {
     );
   }
 
+  const ChangeToggle = ({ isEditing, onToggle }: { isEditing: boolean; onToggle: () => void }) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      style={{
+        background: "none",
+        border: "none",
+        color: "var(--accent)",
+        fontSize: 10,
+        fontWeight: 700,
+        cursor: "pointer",
+        padding: "2px 6px",
+        borderRadius: 4,
+        display: "flex",
+        alignItems: "center",
+        gap: 4,
+        textTransform: "uppercase",
+        letterSpacing: ".4px"
+      }}
+    >
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "middle" }}>
+        {isEditing ? (
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8"></path>
+        ) : (
+          <>
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </>
+        )}
+      </svg>
+      {isEditing ? "Done" : "Change"}
+    </button>
+  );
+
   return (
     <div className="scroll">
       <div className="gateway">
@@ -377,7 +427,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
             <input
               ref={inputRef}
               className="input"
-              placeholder="Search global companies (e.g. Unilever, JPMorgan Chase, Apple)..."
+              placeholder="Search global companies (e.g. Unilever, JPMorgan Chase, Apple, AstraZeneca)..."
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -512,28 +562,56 @@ export default function Gateway({ onSelect }: GatewayProps) {
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)" }}>
-                    Organisation Name
-                  </label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
+                      Organisation Name
+                    </label>
+                    <ChangeToggle isEditing={editable.name} onToggle={() => setEditable(p => ({ ...p, name: !p.name }))} />
+                  </div>
                   <input
                     type="text"
                     className="select"
-                    style={{ width: "100%", height: 38, padding: "0 10px", border: "1px solid var(--border2)", background: "var(--bg3)", color: "var(--text1)" }}
+                    style={{
+                      width: "100%",
+                      height: 38,
+                      padding: "0 10px",
+                      border: "1px solid var(--border2)",
+                      background: editable.name ? "var(--bg1)" : "var(--bg3)",
+                      color: "var(--text1)",
+                      borderRadius: 6,
+                      transition: "all 0.2s ease",
+                      borderColor: editable.name ? "var(--accent)" : "var(--border2)"
+                    }}
                     placeholder="e.g. Unilever plc"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
+                    disabled={!editable.name}
                     required
                   />
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)" }}>
-                    Industry Classification
-                  </label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
+                      Industry Classification
+                    </label>
+                    <ChangeToggle isEditing={editable.industry} onToggle={() => setEditable(p => ({ ...p, industry: !p.industry }))} />
+                  </div>
                   <select
                     className="select"
-                    style={{ width: "100%", height: 38, padding: "0 10px", border: "1px solid var(--border2)", background: "var(--bg3)", color: "var(--text1)" }}
+                    style={{
+                      width: "100%",
+                      height: 38,
+                      padding: "0 10px",
+                      border: "1px solid var(--border2)",
+                      background: editable.industry ? "var(--bg1)" : "var(--bg3)",
+                      color: "var(--text1)",
+                      borderRadius: 6,
+                      transition: "all 0.2s ease",
+                      borderColor: editable.industry ? "var(--accent)" : "var(--border2)"
+                    }}
                     value={formIndustry}
                     onChange={(e) => setFormIndustry(e.target.value)}
+                    disabled={!editable.industry}
                   >
                     {currentIndustries.map((ind) => (
                       <option key={ind} value={ind}>
@@ -545,30 +623,58 @@ export default function Gateway({ onSelect }: GatewayProps) {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)" }}>
-                  Primary Geographies (comma separated)
-                </label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
+                    Primary Geographies (countries, comma separated)
+                  </label>
+                  <ChangeToggle isEditing={editable.geographies} onToggle={() => setEditable(p => ({ ...p, geographies: !p.geographies }))} />
+                </div>
                 <input
                   type="text"
                   className="select"
-                  style={{ width: "100%", height: 38, padding: "0 10px", border: "1px solid var(--border2)", background: "var(--bg3)", color: "var(--text1)" }}
-                  placeholder="e.g. US, EU, UK, Asia"
+                  style={{
+                    width: "100%",
+                    height: 38,
+                    padding: "0 10px",
+                    border: "1px solid var(--border2)",
+                    background: editable.geographies ? "var(--bg1)" : "var(--bg3)",
+                    color: "var(--text1)",
+                    borderRadius: 6,
+                    transition: "all 0.2s ease",
+                    borderColor: editable.geographies ? "var(--accent)" : "var(--border2)"
+                  }}
+                  placeholder="e.g. United States, United Kingdom, Japan"
                   value={formGeographies}
                   onChange={(e) => setFormGeographies(e.target.value)}
+                  disabled={!editable.geographies}
                 />
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)" }}>
-                  Peer Benchmark Group (comma separated)
-                </label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text2)", margin: 0 }}>
+                    Peer Benchmark Group (comma separated)
+                  </label>
+                  <ChangeToggle isEditing={editable.peers} onToggle={() => setEditable(p => ({ ...p, peers: !p.peers }))} />
+                </div>
                 <input
                   type="text"
                   className="select"
-                  style={{ width: "100%", height: 38, padding: "0 10px", border: "1px solid var(--border2)", background: "var(--bg3)", color: "var(--text1)" }}
+                  style={{
+                    width: "100%",
+                    height: 38,
+                    padding: "0 10px",
+                    border: "1px solid var(--border2)",
+                    background: editable.peers ? "var(--bg1)" : "var(--bg3)",
+                    color: "var(--text1)",
+                    borderRadius: 6,
+                    transition: "all 0.2s ease",
+                    borderColor: editable.peers ? "var(--accent)" : "var(--border2)"
+                  }}
                   placeholder="e.g. Nestlé, P&G, Reckitt, Danone"
                   value={formPeers}
                   onChange={(e) => setFormPeers(e.target.value)}
+                  disabled={!editable.peers}
                 />
               </div>
 
