@@ -30,7 +30,6 @@ export default function LandingPage({ onLaunchPlatform }: LandingPageProps) {
             <a href="#how-it-works">Methodology</a>
           </nav>
           <div className="nav-cta">
-            <span className="nav-ghost" style={{ cursor: "pointer" }} onClick={onLaunchPlatform}>Sign in</span>
             <button className="btn btn-primary" onClick={onLaunchPlatform}>
               Launch Platform <Icon name="arrowR" size={14} color="#fff" />
             </button>
