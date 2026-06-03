@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     // Standardize arrays
     const geoArray = Array.isArray(geographies) ? geographies : [geographies || "Global"];
     const commArray = Array.isArray(commodities) ? commodities : [commodities || "None"];
-    const peerArray = Array.isArray(peers) ? peers : [peers || "Competitor A"];
+    const peerArray = Array.isArray(peers) ? peers : [peers || "Unilever"];
 
     // Onboard org
     const org = await onboardOrganisation(

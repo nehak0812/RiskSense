@@ -426,6 +426,31 @@ export async function fetchCompanyInfo(companyName: string, description: string 
       industry: "Consumer Health & FMCG",
       geographies: ["United Kingdom", "Ireland"],
       peers: ["Sainsbury's", "Asda", "Morrisons", "Aldi"]
+    },
+    "mondelez": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["United States", "Switzerland", "United Kingdom", "Canada"],
+      peers: ["Nestlé", "PepsiCo", "The Hershey Company", "Mars", "Unilever"]
+    },
+    "pepsico": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["United States", "United Kingdom", "Mexico", "Canada"],
+      peers: ["Coca-Cola", "Keurig Dr Pepper", "Nestlé", "Mondelez International"]
+    },
+    "coca-cola": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["United States", "United Kingdom", "Germany", "Mexico"],
+      peers: ["PepsiCo", "Keurig Dr Pepper", "Nestlé", "Danone"]
+    },
+    "nike": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["United States", "China", "Vietnam", "Netherlands"],
+      peers: ["Adidas", "Puma", "Under Armour", "Lululemon"]
+    },
+    "adidas": {
+      industry: "Consumer Health & FMCG",
+      geographies: ["Germany", "United States", "China", "Vietnam"],
+      peers: ["Nike", "Puma", "Under Armour", "Lululemon"]
     }
   };
 
@@ -442,7 +467,7 @@ export async function fetchCompanyInfo(companyName: string, description: string 
   } else {
     // Determine default industry based on Wikidata description keywords
     let detectedIndustry = "Consumer Health & FMCG";
-    let detectedPeers = ["Competitor A", "Competitor B", "Competitor C"];
+    let detectedPeers = ["Nestlé", "Unilever", "Procter & Gamble", "Danone"];
     const descText = (description || "").toLowerCase();
 
     if (descText.includes("bank") || descText.includes("financ") || descText.includes("insurance") || descText.includes("investment")) {

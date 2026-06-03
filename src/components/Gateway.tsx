@@ -119,7 +119,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
   const [formName, setFormName] = useState("");
   const [formIndustry, setFormIndustry] = useState("Consumer Health & FMCG");
   const [formGeographies, setFormGeographies] = useState<string[]>(["United States", "United Kingdom"]);
-  const [formPeers, setFormPeers] = useState<string[]>(["Competitor A", "Competitor B"]);
+  const [formPeers, setFormPeers] = useState<string[]>(["Unilever", "Nestlé", "Procter & Gamble"]);
 
   // Input editability states - locking Name by default, edit next to each of the three fields
   const [editable, setEditable] = useState({
@@ -266,7 +266,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
       }
       setFormGeographies(geos);
 
-      let peers: string[] = ["Competitor A", "Competitor B"];
+      let peers: string[] = ["Unilever", "Nestlé", "Procter & Gamble"];
       if (Array.isArray(data.peers)) {
         peers = data.peers;
       } else if (typeof data.peers === "string") {
@@ -287,11 +287,14 @@ export default function Gateway({ onSelect }: GatewayProps) {
 
       // Check if this matches one of our local preset configurations
       const preset = FORBES_2000.find(p => p.name.toLowerCase() === company.name.toLowerCase());
+      const fallbackIndustry = preset?.industry || "Consumer Health & FMCG";
+      const fallbackGeographies = preset?.geographies || ["United States", "United Kingdom"];
+      const fallbackPeers = preset?.peers || (PEER_OPTIONS_BY_INDUSTRY[fallbackIndustry]?.slice(0, 3) || ["Unilever", "Nestlé", "Procter & Gamble"]);
       
       setFormName(company.name);
-      setFormIndustry(preset?.industry || "Consumer Health & FMCG");
-      setFormGeographies(preset?.geographies || ["United States", "United Kingdom"]);
-      setFormPeers(preset?.peers || ["Competitor A", "Competitor B"]);
+      setFormIndustry(fallbackIndustry);
+      setFormGeographies(fallbackGeographies);
+      setFormPeers(fallbackPeers);
       setIsScanning(false);
       setShowFormDetails(true);
     }
