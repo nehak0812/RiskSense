@@ -601,3 +601,185 @@ export async function fetchCompanyInfo(companyName: string, description: string 
     return defaultPayload;
   }
 }
+
+export interface RiskTemplate {
+  code: string;
+  title: string;
+  category: string;
+  ownerRole: string;
+  ownerName: string;
+  inherentRating: string;
+  controlEffectiveness: string;
+  residualRating: string;
+  appetiteStatus: string;
+  score: number;
+  trendDirection: string;
+  trendValue: number;
+  horizon: string;
+  isPrincipal: boolean;
+  peerGap: boolean;
+}
+
+export const INDUSTRY_RISK_TEMPLATES: Record<string, Omit<RiskTemplate, "lastReviewedAt" | "nextReviewAt">[]> = {
+  "Consumer Health & FMCG": [
+    { code: "RR-01", title: "Regulatory Non-Compliance (EUDR & CSRD)", category: "Regulatory", ownerRole: "Chief Risk Officer", ownerName: "S. Rahman", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.8, trendDirection: "Up", trendValue: 1.4, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-02", title: "Generative AI Systems Governance Gaps", category: "Technology & AI", ownerRole: "Chief Technology Officer", ownerName: "M. Chen", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.5, trendDirection: "Up", trendValue: 1.8, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-03", title: "Suez/Rotterdam Shipping Lane Bottlenecks", category: "Geopolitical", ownerRole: "Head of Global Supply Chain", ownerName: "V. Dupont", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.9, trendDirection: "Stable", trendValue: 0.0, horizon: "med", isPrincipal: true, peerGap: false },
+    { code: "RR-04", title: "Resource Supply Scarcity (Cocoa, Oil Palm)", category: "Supply chain", ownerRole: "Director of Procurement", ownerName: "J. Kovacs", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.2, trendDirection: "Up", trendValue: 0.5, horizon: "med", isPrincipal: false, peerGap: true },
+    { code: "RR-05", title: "Southern European Water Scarcity Risks", category: "Climate & nature", ownerRole: "Head of Environmental Sustainability", ownerName: "A. Lindstrom", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 6.3, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: true, peerGap: true },
+    { code: "RR-06", title: "Global Inflationary Commodity Margin Squeeze", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "K. Patel", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 5.7, trendDirection: "Down", trendValue: -0.6, horizon: "med", isPrincipal: false, peerGap: false }
+  ],
+  "Banking & Financial Services": [
+    { code: "RR-01", title: "ESG Disclosures & SFDR Regulatory Compliance", category: "Regulatory", ownerRole: "Chief Compliance Officer", ownerName: "E. Jenkins", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.2, trendDirection: "Up", trendValue: 0.4, horizon: "near", isPrincipal: true, peerGap: false },
+    { code: "RR-02", title: "Ransomware & Core Banking Cyber Disruption", category: "Technology & AI", ownerRole: "Chief Information Security Officer", ownerName: "A. Vance", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.4, trendDirection: "Up", trendValue: 1.2, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-03", title: "Cross-Border Sanctions & Asset Freezing Mandates", category: "Geopolitical", ownerRole: "Head of Financial Crime Compliance", ownerName: "L. Zhang", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.5, trendDirection: "Stable", trendValue: 0.0, horizon: "near", isPrincipal: true, peerGap: false },
+    { code: "RR-04", title: "Third-Party Cloud Hosting Concentration Risks", category: "Supply chain", ownerRole: "Head of Vendor Risk Management", ownerName: "M. Albright", inherentRating: "Medium", controlEffectiveness: "Partial", residualRating: "Medium", appetiteStatus: "At tolerance", score: 6.8, trendDirection: "Up", trendValue: 0.5, horizon: "med", isPrincipal: false, peerGap: true },
+    { code: "RR-05", title: "Climate Stress-Testing & Fossil Loan Exposure", category: "Climate & nature", ownerRole: "Head of Sustainable Finance", ownerName: "H. Giraud", inherentRating: "High", controlEffectiveness: "Limited", residualRating: "High", appetiteStatus: "Breach", score: 8.1, trendDirection: "Up", trendValue: 1.5, horizon: "long", isPrincipal: true, peerGap: true },
+    { code: "RR-06", title: "Interest Rate Spikes & Liquidity Mismatch", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "R. Mehta", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 5.9, trendDirection: "Down", trendValue: -0.8, horizon: "med", isPrincipal: true, peerGap: false }
+  ],
+  "Technology & Telecom": [
+    { code: "RR-01", title: "EU AI Act Transparency & Model Compliance", category: "Regulatory", ownerRole: "VP of Regulatory Affairs", ownerName: "C. Fletcher", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.6, trendDirection: "Up", trendValue: 1.5, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-02", title: "Data Center Outages & API Infrastructure Failure", category: "Technology & AI", ownerRole: "Chief Technology Officer", ownerName: "S. Wozniak", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.4, trendDirection: "Stable", trendValue: 0.0, horizon: "near", isPrincipal: true, peerGap: false },
+    { code: "RR-03", title: "US-China Semiconductor Export Restrictions", category: "Geopolitical", ownerRole: "Head of Government Relations", ownerName: "K. Tanaka", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.9, trendDirection: "Up", trendValue: 1.7, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "GPU Chip Supply Bottlenecks & Hardware Shortage", category: "Supply chain", ownerRole: "Director of Global Sourcing", ownerName: "L. de Souza", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.8, trendDirection: "Up", trendValue: 0.8, horizon: "med", isPrincipal: false, peerGap: true },
+    { code: "RR-05", title: "Server Site Power Grid Overloads & Water-Cooling", category: "Climate & nature", ownerRole: "Director of Sustainability", ownerName: "O. Nielsen", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 5.5, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: false },
+    { code: "RR-06", title: "AI Infrastructure Over-Investment vs Yield Squeeze", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "P. Croft", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.2, trendDirection: "Up", trendValue: 0.9, horizon: "med", isPrincipal: true, peerGap: true }
+  ],
+  "Pharmaceuticals": [
+    { code: "RR-01", title: "Drug Approval Delays & Patent Cliff Compliance", category: "Regulatory", ownerRole: "Head of Regulatory Science", ownerName: "Dr. A. Carter", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.8, trendDirection: "Stable", trendValue: 0.0, horizon: "med", isPrincipal: true, peerGap: false },
+    { code: "RR-02", title: "AI Drug Discovery IP Theft & Lab Leaks", category: "Technology & AI", ownerRole: "Chief Digital Officer", ownerName: "P. Tremblay", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.3, trendDirection: "Up", trendValue: 1.1, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-03", title: "Critical API Export Blockades & Trade Tariffs", category: "Geopolitical", ownerRole: "Head of Trade & Supply Compliance", ownerName: "M. Al-Mutawa", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.7, trendDirection: "Up", trendValue: 1.6, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Cold-Chain Logistics Bottlenecks & Raw Ingredient", category: "Supply chain", ownerRole: "VP of Global Supply Chain", ownerName: "F. Bianchi", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.1, trendDirection: "Up", trendValue: 0.4, horizon: "med", isPrincipal: false, peerGap: false },
+    { code: "RR-05", title: "Chemical Effluent Regulations & Water Discharges", category: "Climate & nature", ownerRole: "Director of Environmental Health", ownerName: "J. Hansen", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 5.9, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: true },
+    { code: "RR-06", title: "Drug Price Cap Controls & Medicare Cap Impact", category: "Financial & macro", ownerRole: "VP of Commercial Finance", ownerName: "S. O'Connor", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.4, trendDirection: "Up", trendValue: 0.7, horizon: "near", isPrincipal: true, peerGap: true }
+  ],
+  "Integrated Energy": [
+    { code: "RR-01", title: "Transition Regulations & Carbon Tax Liabilities", category: "Regulatory", ownerRole: "VP of Climate Strategy", ownerName: "K. Lindqvist", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.5, trendDirection: "Up", trendValue: 1.3, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-02", title: "SCADA/ICS Industrial System Cyber Vulnerability", category: "Technology & AI", ownerRole: "Chief Security Officer", ownerName: "J. Rinaldi", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.7, trendDirection: "Stable", trendValue: 0.0, horizon: "near", isPrincipal: true, peerGap: false },
+    { code: "RR-03", title: "Strait of Hormuz Shipping Lane Blockades", category: "Geopolitical", ownerRole: "Director of Global Trade Security", ownerName: "A. Gromyko", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.8, trendDirection: "Up", trendValue: 1.5, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Deepwater Drilling Rig Scarcity & Sourcing Delay", category: "Supply chain", ownerRole: "Head of Offshore Procurement", ownerName: "B. Mikkelsen", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.0, trendDirection: "Up", trendValue: 0.3, horizon: "med", isPrincipal: false, peerGap: false },
+    { code: "RR-05", title: "Stranded Oil & Gas Reserves under Net-Zero 2050", category: "Climate & nature", ownerRole: "Head of ESG Risk", ownerName: "F. Dubois", inherentRating: "High", controlEffectiveness: "Limited", residualRating: "High", appetiteStatus: "Breach", score: 8.2, trendDirection: "Up", trendValue: 1.1, horizon: "long", isPrincipal: true, peerGap: true },
+    { code: "RR-06", title: "Crude Oil Price Volatility & Green Finance Cost", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "M. Ross", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.1, trendDirection: "Down", trendValue: -0.9, horizon: "med", isPrincipal: false, peerGap: false }
+  ],
+  "Transport & Logistics": [
+    { code: "RR-01", title: "IMO Carbon Offset Tariffs & Decarbonization Mandates", category: "Regulatory", ownerRole: "Head of Regulatory & Policy", ownerName: "J. van der Berg", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.5, trendDirection: "Up", trendValue: 0.4, horizon: "med", isPrincipal: true, peerGap: false },
+    { code: "RR-02", title: "Autonomous Routing Network API Failures & Hacks", category: "Technology & AI", ownerRole: "Chief Technology Officer", ownerName: "D. Miller", inherentRating: "Medium", controlEffectiveness: "Partial", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.2, trendDirection: "Up", trendValue: 0.8, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-03", title: "Panama & Suez Canal Blockages & Re-routing Frictions", category: "Geopolitical", ownerRole: "Chief Operating Officer", ownerName: "L. Sterling", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.6, trendDirection: "Up", trendValue: 1.4, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Port Warehouse Capacity Crunches & Cargo Backlogs", category: "Supply chain", ownerRole: "VP of Global Operations", ownerName: "T. Takahashi", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.7, trendDirection: "Up", trendValue: 0.6, horizon: "med", isPrincipal: false, peerGap: true },
+    { code: "RR-05", title: "Extreme Flooding Damaging Coastal Port Facilities", category: "Climate & nature", ownerRole: "Director of Infrastructure Resilience", ownerName: "M. Kowalski", inherentRating: "High", controlEffectiveness: "Limited", residualRating: "High", appetiteStatus: "Breach", score: 8.3, trendDirection: "Up", trendValue: 1.2, horizon: "long", isPrincipal: true, peerGap: true },
+    { code: "RR-06", title: "Fuel Price Spikes & Container Rate Volatility", category: "Financial & macro", ownerRole: "VP of Commercial Finance", ownerName: "C. Campbell", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 5.8, trendDirection: "Down", trendValue: -0.7, horizon: "med", isPrincipal: false, peerGap: false }
+  ],
+  "Diversified Industrials": [
+    { code: "RR-01", title: "Supply Chain Due Diligence Act (CSDDD) Penalties", category: "Regulatory", ownerRole: "Chief Compliance Officer", ownerName: "A. Schmidt", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.4, trendDirection: "Up", trendValue: 1.2, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-02", title: "SCADA Industrial Networks Ransomware Disruptions", category: "Technology & AI", ownerRole: "Chief Information Officer", ownerName: "R. Davies", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.6, trendDirection: "Stable", trendValue: 0.0, horizon: "near", isPrincipal: true, peerGap: false },
+    { code: "RR-03", title: "Steel & Aluminium Trade Tariffs & Protectionism", category: "Geopolitical", ownerRole: "Head of Government & Trade Relations", ownerName: "Y. Sato", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.7, trendDirection: "Up", trendValue: 1.4, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Critical Mineral Sourcing Delays (Cobalt, Lithium)", category: "Supply chain", ownerRole: "VP of Strategic Procurement", ownerName: "J. Ramos", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.5, trendDirection: "Up", trendValue: 0.6, horizon: "med", isPrincipal: false, peerGap: true },
+    { code: "RR-05", title: "Manufacturing Site Drought Restrictions & Water Crunches", category: "Climate & nature", ownerRole: "Director of Environmental Compliance", ownerName: "E. Larsson", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 6.0, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: false },
+    { code: "RR-06", title: "Raw Material Inflation & Energy Squeeze margins", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "M. Patel", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.2, trendDirection: "Down", trendValue: -0.5, horizon: "med", isPrincipal: true, peerGap: false }
+  ],
+  "Retail & E-commerce": [
+    { code: "RR-01", title: "EPR Packaging Waste & Circular Economy Penalties", category: "Regulatory", ownerRole: "Head of Sustainability & Policy", ownerName: "G. Bernard", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.1, trendDirection: "Up", trendValue: 0.3, horizon: "med", isPrincipal: true, peerGap: false },
+    { code: "RR-02", title: "Payment Gateway Cyber Frauds & API Network Downtime", category: "Technology & AI", ownerRole: "VP of Digital Engineering", ownerName: "K. Gupta", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.3, trendDirection: "Up", trendValue: 1.1, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-03", title: "Cross-Border Customs Tariffs & Border Restrictions", category: "Geopolitical", ownerRole: "Head of International Trade", ownerName: "S. Ocampo", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.5, trendDirection: "Up", trendValue: 1.3, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Warehouse Labor Crunches & Last-Mile Delays", category: "Supply chain", ownerRole: "VP of Fulfillment & Logistics", ownerName: "M. Taylor", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.0, trendDirection: "Up", trendValue: 0.4, horizon: "med", isPrincipal: false, peerGap: false },
+    { code: "RR-05", title: "Scope 3 Carbon Tracking Mandates for Suppliers", category: "Climate & nature", ownerRole: "Director of ESG Compliance", ownerName: "A. de Vries", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 5.8, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: true },
+    { code: "RR-06", title: "Consumer Purchasing Power Decline & Margin Squeeze", category: "Financial & macro", ownerRole: "VP of Corporate Finance", ownerName: "D. Cooper", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.3, trendDirection: "Up", trendValue: 0.8, horizon: "near", isPrincipal: true, peerGap: true }
+  ],
+  "Automotive & Manufacturing": [
+    { code: "RR-01", title: "Fleet CO2 Emission Mandates & EV Shift Penalties", category: "Regulatory", ownerRole: "Director of Government & Policy", ownerName: "M. Weber", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.6, trendDirection: "Up", trendValue: 1.4, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-02", title: "Connected Vehicle OTA (Over-the-Air) Hack Vulnerability", category: "Technology & AI", ownerRole: "Chief Cyber Security Architect", ownerName: "F. Wagner", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.8, trendDirection: "Stable", trendValue: 0.0, horizon: "near", isPrincipal: true, peerGap: false },
+    { code: "RR-03", title: "Rare Earth Supply Designations & Sino-US Trade Tariffs", category: "Geopolitical", ownerRole: "Head of Sourcing Risk", ownerName: "T. Nguyen", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.8, trendDirection: "Up", trendValue: 1.6, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Battery Cell & Semiconductor OEM Supply Blockades", category: "Supply chain", ownerRole: "Director of Logistics & Operations", ownerName: "P. Santos", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.2, trendDirection: "Up", trendValue: 0.5, horizon: "med", isPrincipal: false, peerGap: false },
+    { code: "RR-05", title: "Plant Hydropower Outages & Casting Site Water Scarcity", category: "Climate & nature", ownerRole: "Director of Environmental Strategy", ownerName: "S. Nilsson", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 6.2, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: true },
+    { code: "RR-06", title: "High Capital Cost of EV Re-tooling & Metal Prices", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "G. Rossi", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.5, trendDirection: "Up", trendValue: 0.9, horizon: "med", isPrincipal: true, peerGap: true }
+  ]
+};
+
+export async function fetchRisksForCompany(
+  companyName: string,
+  industry: string,
+  geographies: string[],
+  peers: string[]
+): Promise<Omit<RiskTemplate, "lastReviewedAt" | "nextReviewAt">[]> {
+  const defaultPayload = INDUSTRY_RISK_TEMPLATES[industry] || INDUSTRY_RISK_TEMPLATES["Consumer Health & FMCG"];
+
+  if (!genAI) {
+    console.warn("Gemini AI API Key not configured. Returning static fallback industry risk templates.");
+    return defaultPayload;
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: { responseMimeType: "application/json" },
+    });
+
+    const prompt = `
+      You are an expert enterprise risk analyst. Generate a list of exactly 6 principal risks for the following company:
+      Company: "${companyName}"
+      Industry: "${industry}"
+      Geographies: ${JSON.stringify(geographies)}
+      Peers: ${JSON.stringify(peers)}
+
+      The 6 risks must map to the following categories (exactly one risk per category):
+      1. "Regulatory"
+      2. "Technology & AI"
+      3. "Geopolitical"
+      4. "Supply chain"
+      5. "Climate & nature"
+      6. "Financial & macro"
+
+      For each risk, provide the following details:
+      - code: "RR-01" to "RR-06"
+      - title: A specific, realistic enterprise risk title tailored to this company and industry (e.g. EU AI Act compliance for tech, oil price volatility for energy, credit risk for banks, cold-chain logistics for pharma).
+      - category: The exact category name from the list above.
+      - ownerRole: A realistic executive owner role (e.g. "Chief Risk Officer", "Chief Technology Officer", "Head of Supply Chain").
+      - ownerName: A realistic name of the owner (e.g. "S. Rahman", "M. Chen", "K. Patel").
+      - inherentRating: "High" or "Medium" or "Low"
+      - controlEffectiveness: "Adequate" or "Partial" or "Limited"
+      - residualRating: "High" or "Medium" or "Low"
+      - appetiteStatus: "Within" or "At tolerance" or "Breach"
+      - score: A float between 0.0 and 10.0 representing the current exposure score.
+      - trendDirection: "Up" or "Down" or "Stable"
+      - trendValue: A float representing recent change (e.g. 0.5, -0.6, 0.0)
+      - horizon: "near" or "med" or "long"
+      - isPrincipal: true or false (at least 3 should be true)
+      - peerGap: true or false (at least 2 should be true)
+
+      Format the response strictly as a JSON array of 6 objects matching this structure:
+      [
+        {
+          "code": "RR-01",
+          "title": "Risk Title",
+          "category": "Regulatory",
+          "ownerRole": "Role",
+          "ownerName": "Name",
+          "inherentRating": "High",
+          "controlEffectiveness": "Partial",
+          "residualRating": "High",
+          "appetiteStatus": "Breach",
+          "score": 8.8,
+          "trendDirection": "Up",
+          "trendValue": 1.4,
+          "horizon": "near",
+          "isPrincipal": true,
+          "peerGap": true
+        },
+        ...
+      ]
+    `;
+
+    const response = await model.generateContent(prompt);
+    const responseText = response.response.text();
+    const cleanJson = JSON.parse(responseText.trim());
+    
+    if (Array.isArray(cleanJson) && cleanJson.length === 6) {
+      return cleanJson;
+    }
+    return defaultPayload;
+  } catch (error) {
+    console.error("Error generating risks with Gemini:", error);
+    return defaultPayload;
+  }
+}
+

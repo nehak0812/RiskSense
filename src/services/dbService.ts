@@ -5,6 +5,7 @@ import {
   classifyAndEnrichSignal,
   cosineSimilarity,
   generateBoardSummary,
+  fetchRisksForCompany,
 } from "./aiService";
 
 // Prisma client initialization
@@ -162,129 +163,17 @@ export async function onboardOrganisation(
     });
   }
 
-  // Pre-seed some default enterprise risks in register
-  const defaultRisks = [
-    {
-      code: "RR-01",
-      title: "Regulatory Non-Compliance (EUDR & CSRD)",
-      category: "Regulatory",
-      ownerRole: "Chief Risk Officer",
-      ownerName: "S. Rahman",
-      inherentRating: "High",
-      controlEffectiveness: "Partial",
-      residualRating: "High",
-      appetiteStatus: "Breach",
-      score: 8.8,
-      trendDirection: "Up",
-      trendValue: 1.4,
-      horizon: "near",
-      isPrincipal: true,
-      peerGap: true,
-      lastReviewedAt: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000),
-      nextReviewAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-    },
-    {
-      code: "RR-02",
-      title: "Generative AI Systems Governance Gaps",
-      category: "Technology & AI",
-      ownerRole: "Chief Technology Officer",
-      ownerName: "M. Chen",
-      inherentRating: "High",
-      controlEffectiveness: "Partial",
-      residualRating: "High",
-      appetiteStatus: "Breach",
-      score: 8.5,
-      trendDirection: "Up",
-      trendValue: 1.8,
-      horizon: "near",
-      isPrincipal: true,
-      peerGap: true,
-      lastReviewedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
-      nextReviewAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
-    },
-    {
-      code: "RR-03",
-      title: "Suez/Rotterdam Shipping Lane Bottlenecks",
-      category: "Geopolitical",
-      ownerRole: "Head of Global Supply Chain",
-      ownerName: "V. Dupont",
-      inherentRating: "High",
-      controlEffectiveness: "Adequate",
-      residualRating: "Medium",
-      appetiteStatus: "At tolerance",
-      score: 7.9,
-      trendDirection: "Stable",
-      trendValue: 0.0,
-      horizon: "med",
-      isPrincipal: true,
-      peerGap: false,
-      lastReviewedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      nextReviewAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-    },
-    {
-      code: "RR-04",
-      title: "Resource Supply Scarcity (Cocoa, Oil Palm)",
-      category: "Supply chain",
-      ownerRole: "Director of Procurement",
-      ownerName: "J. Kovacs",
-      inherentRating: "High",
-      controlEffectiveness: "Partial",
-      residualRating: "Medium",
-      appetiteStatus: "At tolerance",
-      score: 7.2,
-      trendDirection: "Up",
-      trendValue: 0.5,
-      horizon: "med",
-      isPrincipal: false,
-      peerGap: true,
-      lastReviewedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-      nextReviewAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    },
-    {
-      code: "RR-05",
-      title: "Southern European Water Scarcity Risks",
-      category: "Climate & nature",
-      ownerRole: "Head of Environmental Sustainability",
-      ownerName: "A. Lindstrom",
-      inherentRating: "Medium",
-      controlEffectiveness: "Adequate",
-      residualRating: "Low",
-      appetiteStatus: "Within",
-      score: 6.3,
-      trendDirection: "Stable",
-      trendValue: 0.0,
-      horizon: "long",
-      isPrincipal: true,
-      peerGap: true,
-      lastReviewedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
-      nextReviewAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-    },
-    {
-      code: "RR-06",
-      title: "Global Inflationary Commodity Margin Squeeze",
-      category: "Financial & macro",
-      ownerRole: "Chief Financial Officer",
-      ownerName: "K. Patel",
-      inherentRating: "High",
-      controlEffectiveness: "Adequate",
-      residualRating: "Medium",
-      appetiteStatus: "Within",
-      score: 5.7,
-      trendDirection: "Down",
-      trendValue: -0.6,
-      horizon: "med",
-      isPrincipal: false,
-      peerGap: false,
-      lastReviewedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-      nextReviewAt: new Date(Date.now() + 75 * 24 * 60 * 60 * 1000),
-    }
-  ];
+  // Fetch industry-specific or Gemini-generated enterprise risks in register
+  const risksList = await fetchRisksForCompany(name, industry, geographies, peers);
 
-  for (const r of defaultRisks) {
+  for (let i = 0; i < risksList.length; i++) {
+    const r = risksList[i];
     const risk = await prisma.risk.create({
       data: {
         organisationId: org.id,
         ...r,
+        lastReviewedAt: new Date(Date.now() - (15 + i * 10) * 24 * 60 * 60 * 1000),
+        nextReviewAt: new Date(Date.now() + (75 - i * 5) * 24 * 60 * 60 * 1000),
       },
     });
 
