@@ -5,34 +5,127 @@ import { Icon, DomainTag, StatTile } from "./SharedUI";
 import { BumpChart } from "./ChartLibrary";
 
 const INDICES = [
-  { id: "ftse100", label: "FTSE 100", companies: 100, filed: 94 },
-  { id: "sp500", label: "S&P 500", companies: 500, filed: 471 },
-  { id: "stoxx", label: "EURO STOXX 50", companies: 50, filed: 48 },
+  { 
+    id: "ftse100", 
+    label: "FTSE 100", 
+    companies: 100, 
+    filed: 94,
+    risksTracked: 38,
+    fastestRiserValue: "▲ 6",
+    fastestRiserSub: "AI governance · climbed to 8th",
+    fastestRiserDir: "up" as const,
+    fastestRiserAccent: "var(--d-tech)",
+    biggestFallerValue: "▼ 2",
+    biggestFallerSub: "Macro & inflation · fell to 4th",
+    biggestFallerDir: "down" as const,
+    biggestFallerAccent: "var(--d-fin)",
+    riserText: "AI governance has climbed six places and tariffs eight quarter-on-quarter. Cyber security remains the single most-cited risk for a fourth consecutive quarter.",
+  },
+  { 
+    id: "sp500", 
+    label: "S&P 500", 
+    companies: 500, 
+    filed: 471,
+    risksTracked: 45,
+    fastestRiserValue: "▲ 5",
+    fastestRiserSub: "AI governance · climbed to 3rd",
+    fastestRiserDir: "up" as const,
+    fastestRiserAccent: "var(--d-tech)",
+    biggestFallerValue: "▼ 3",
+    biggestFallerSub: "Talent & workforce · fell to 7th",
+    biggestFallerDir: "down" as const,
+    biggestFallerAccent: "var(--d-soc)",
+    riserText: "AI governance has surged five places into the top three, driven by US tech filings. Cyber security and macroeconomic pressure remain the top two most-cited risks.",
+  },
+  { 
+    id: "stoxx", 
+    label: "EURO STOXX 50", 
+    companies: 50, 
+    filed: 48,
+    risksTracked: 34,
+    fastestRiserValue: "▲ 4",
+    fastestRiserSub: "Tariffs & trade · climbed to 7th",
+    fastestRiserDir: "up" as const,
+    fastestRiserAccent: "var(--d-trade)",
+    biggestFallerValue: "▼ 3",
+    biggestFallerSub: "Talent & workforce · fell to 10th",
+    biggestFallerDir: "down" as const,
+    biggestFallerAccent: "var(--d-soc)",
+    riserText: "Regulatory compliance change is the #1 concern under new EU acts. Climate transition has climbed to #2, and tariffs/trade policy rose four places Q-o-Q.",
+  },
 ];
 
-const CITED_RISKS = [
-  { id: "cr1", risk: "Cyber-attack & data security", domain: "tech", cite: 91, prevQ: 88, rank: 1, prevRank: 1 },
-  { id: "cr2", risk: "Geopolitical instability", domain: "geo", cite: 86, prevQ: 74, rank: 2, prevRank: 4 },
-  { id: "cr3", risk: "Regulatory & compliance change", domain: "reg", cite: 84, prevQ: 80, rank: 3, prevRank: 3 },
-  { id: "cr4", risk: "Macroeconomic & inflation", domain: "fin", cite: 81, prevQ: 85, rank: 4, prevRank: 2 },
-  { id: "cr5", risk: "Climate transition & physical", domain: "clim", cite: 78, prevQ: 69, rank: 5, prevRank: 6 },
-  { id: "cr6", risk: "Supply-chain disruption", domain: "trade", cite: 76, prevQ: 71, rank: 6, prevRank: 5 },
-  { id: "cr7", risk: "Talent & workforce", domain: "soc", cite: 64, prevQ: 66, rank: 7, prevRank: 7 },
-  { id: "cr8", risk: "AI governance & adoption", domain: "tech", cite: 61, prevQ: 38, rank: 8, prevRank: 14 },
-  { id: "cr9", risk: "Tariffs & trade policy", domain: "trade", cite: 58, prevQ: 33, rank: 9, prevRank: 16 },
-  { id: "cr10", risk: "Sanctions & export controls", domain: "geo", cite: 54, prevQ: 41, rank: 10, prevRank: 12 },
-  { id: "cr11", risk: "Litigation & legal liability", domain: "legal", cite: 49, prevQ: 47, rank: 11, prevRank: 10 },
-  { id: "cr12", risk: "Reputational & brand", domain: "soc", cite: 46, prevQ: 44, rank: 12, prevRank: 11 },
-];
+const CITED_RISKS_BY_INDEX: Record<string, Array<{ id: string; risk: string; domain: string; cite: number; prevQ: number; rank: number; prevRank: number }>> = {
+  ftse100: [
+    { id: "cr1", risk: "Cyber-attack & data security", domain: "tech", cite: 91, prevQ: 88, rank: 1, prevRank: 1 },
+    { id: "cr2", risk: "Geopolitical instability", domain: "geo", cite: 86, prevQ: 74, rank: 2, prevRank: 4 },
+    { id: "cr3", risk: "Regulatory & compliance change", domain: "reg", cite: 84, prevQ: 80, rank: 3, prevRank: 3 },
+    { id: "cr4", risk: "Macroeconomic & inflation", domain: "fin", cite: 81, prevQ: 85, rank: 4, prevRank: 2 },
+    { id: "cr5", risk: "Climate transition & physical", domain: "clim", cite: 78, prevQ: 69, rank: 5, prevRank: 6 },
+    { id: "cr6", risk: "Supply-chain disruption", domain: "trade", cite: 76, prevQ: 71, rank: 6, prevRank: 5 },
+    { id: "cr7", risk: "Talent & workforce", domain: "soc", cite: 64, prevQ: 66, rank: 7, prevRank: 7 },
+    { id: "cr8", risk: "AI governance & adoption", domain: "tech", cite: 61, prevQ: 38, rank: 8, prevRank: 14 },
+    { id: "cr9", risk: "Tariffs & trade policy", domain: "trade", cite: 58, prevQ: 33, rank: 9, prevRank: 16 },
+    { id: "cr10", risk: "Sanctions & export controls", domain: "geo", cite: 54, prevQ: 41, rank: 10, prevRank: 12 },
+    { id: "cr11", risk: "Litigation & legal liability", domain: "legal", cite: 49, prevQ: 47, rank: 11, prevRank: 10 },
+    { id: "cr12", risk: "Reputational & brand", domain: "soc", cite: 46, prevQ: 44, rank: 12, prevRank: 11 },
+  ],
+  sp500: [
+    { id: "cr1", risk: "Cyber-attack & data security", domain: "tech", cite: 96, prevQ: 94, rank: 1, prevRank: 1 },
+    { id: "cr4", risk: "Macroeconomic & inflation", domain: "fin", cite: 92, prevQ: 93, rank: 2, prevRank: 2 },
+    { id: "cr8", risk: "AI governance & adoption", domain: "tech", cite: 88, prevQ: 65, rank: 3, prevRank: 8 },
+    { id: "cr3", risk: "Regulatory & compliance change", domain: "reg", cite: 85, prevQ: 87, rank: 4, prevRank: 3 },
+    { id: "cr11", risk: "Litigation & legal liability", domain: "legal", cite: 82, prevQ: 79, rank: 5, prevRank: 6 },
+    { id: "cr2", risk: "Geopolitical instability", domain: "geo", cite: 79, prevQ: 81, rank: 6, prevRank: 5 },
+    { id: "cr7", risk: "Talent & workforce", domain: "soc", cite: 75, prevQ: 83, rank: 7, prevRank: 4 },
+    { id: "cr6", risk: "Supply-chain disruption", domain: "trade", cite: 71, prevQ: 74, rank: 8, prevRank: 7 },
+    { id: "cr5", risk: "Climate transition & physical", domain: "clim", cite: 66, prevQ: 61, rank: 9, prevRank: 10 },
+    { id: "cr9", risk: "Tariffs & trade policy", domain: "trade", cite: 62, prevQ: 55, rank: 10, prevRank: 11 },
+    { id: "cr10", risk: "Sanctions & export controls", domain: "geo", cite: 59, prevQ: 58, rank: 11, prevRank: 9 },
+    { id: "cr12", risk: "Reputational & brand", domain: "soc", cite: 55, prevQ: 53, rank: 12, prevRank: 12 },
+  ],
+  stoxx: [
+    { id: "cr3", risk: "Regulatory & compliance change", domain: "reg", cite: 95, prevQ: 93, rank: 1, prevRank: 1 },
+    { id: "cr5", risk: "Climate transition & physical", domain: "clim", cite: 90, prevQ: 87, rank: 2, prevRank: 3 },
+    { id: "cr2", risk: "Geopolitical instability", domain: "geo", cite: 88, prevQ: 85, rank: 3, prevRank: 4 },
+    { id: "cr6", risk: "Supply-chain disruption", domain: "trade", cite: 86, prevQ: 91, rank: 4, prevRank: 2 },
+    { id: "cr1", risk: "Cyber-attack & data security", domain: "tech", cite: 83, prevQ: 81, rank: 5, prevRank: 5 },
+    { id: "cr4", risk: "Macroeconomic & inflation", domain: "fin", cite: 79, prevQ: 80, rank: 6, prevRank: 6 },
+    { id: "cr9", risk: "Tariffs & trade policy", domain: "trade", cite: 75, prevQ: 64, rank: 7, prevRank: 11 },
+    { id: "cr8", risk: "AI governance & adoption", domain: "tech", cite: 71, prevQ: 52, rank: 8, prevRank: 12 },
+    { id: "cr10", risk: "Sanctions & export controls", domain: "geo", cite: 68, prevQ: 70, rank: 9, prevRank: 7 },
+    { id: "cr7", risk: "Talent & workforce", domain: "soc", cite: 60, prevQ: 62, rank: 10, prevRank: 9 },
+    { id: "cr11", risk: "Litigation & legal liability", domain: "legal", cite: 55, prevQ: 58, rank: 11, prevRank: 8 },
+    { id: "cr12", risk: "Reputational & brand", domain: "soc", cite: 50, prevQ: 48, rank: 12, prevRank: 10 },
+  ],
+};
 
-const SECTOR_BREAKDOWN = [
-  { sector: "Financials", geo: 72, trade: 41, reg: 88, fin: 79, tech: 84, clim: 61, soc: 52, legal: 58 },
-  { sector: "Consumer", geo: 64, trade: 81, reg: 70, fin: 66, tech: 58, clim: 74, soc: 69, legal: 44 },
-  { sector: "Industrials", geo: 70, trade: 86, reg: 62, fin: 60, tech: 55, clim: 64, soc: 41, legal: 39 },
-  { sector: "Technology", geo: 58, trade: 49, reg: 76, fin: 54, tech: 92, clim: 38, soc: 47, legal: 63 },
-  { sector: "Energy", geo: 81, trade: 52, reg: 79, fin: 57, tech: 44, clim: 89, soc: 48, legal: 55 },
-  { sector: "Healthcare", geo: 47, trade: 44, reg: 84, fin: 51, tech: 66, clim: 36, soc: 58, legal: 71 },
-];
+const SECTOR_BREAKDOWN_BY_INDEX: Record<string, Array<{ sector: string; geo: number; trade: number; reg: number; fin: number; tech: number; clim: number; soc: number; legal: number }>> = {
+  ftse100: [
+    { sector: "Financials", geo: 72, trade: 41, reg: 88, fin: 79, tech: 84, clim: 61, soc: 52, legal: 58 },
+    { sector: "Consumer", geo: 64, trade: 81, reg: 70, fin: 66, tech: 58, clim: 74, soc: 69, legal: 44 },
+    { sector: "Industrials", geo: 70, trade: 86, reg: 62, fin: 60, tech: 55, clim: 64, soc: 41, legal: 39 },
+    { sector: "Technology", geo: 58, trade: 49, reg: 76, fin: 54, tech: 92, clim: 38, soc: 47, legal: 63 },
+    { sector: "Energy", geo: 81, trade: 52, reg: 79, fin: 57, tech: 44, clim: 89, soc: 48, legal: 55 },
+    { sector: "Healthcare", geo: 47, trade: 44, reg: 84, fin: 51, tech: 66, clim: 36, soc: 58, legal: 71 },
+  ],
+  sp500: [
+    { sector: "Financials", geo: 68, trade: 35, reg: 90, fin: 88, tech: 91, clim: 48, soc: 60, legal: 72 },
+    { sector: "Consumer", geo: 59, trade: 76, reg: 72, fin: 84, tech: 78, clim: 55, soc: 75, legal: 62 },
+    { sector: "Industrials", geo: 75, trade: 80, reg: 68, fin: 79, tech: 74, clim: 58, soc: 55, legal: 59 },
+    { sector: "Technology", geo: 65, trade: 55, reg: 82, fin: 63, tech: 98, clim: 42, soc: 61, legal: 78 },
+    { sector: "Energy", geo: 88, trade: 48, reg: 75, fin: 71, tech: 52, clim: 78, soc: 50, legal: 65 },
+    { sector: "Healthcare", geo: 52, trade: 40, reg: 89, fin: 62, tech: 75, clim: 30, soc: 64, legal: 84 },
+  ],
+  stoxx: [
+    { sector: "Financials", geo: 80, trade: 48, reg: 96, fin: 75, tech: 78, clim: 75, soc: 58, legal: 60 },
+    { sector: "Consumer", geo: 74, trade: 88, reg: 85, fin: 58, tech: 62, clim: 82, soc: 62, legal: 42 },
+    { sector: "Industrials", geo: 82, trade: 92, reg: 79, fin: 64, tech: 59, clim: 79, soc: 48, legal: 45 },
+    { sector: "Technology", geo: 70, trade: 65, reg: 88, fin: 50, tech: 88, clim: 52, soc: 50, legal: 58 },
+    { sector: "Energy", geo: 92, trade: 60, reg: 88, fin: 52, tech: 40, clim: 94, soc: 42, legal: 50 },
+    { sector: "Healthcare", geo: 60, trade: 50, reg: 92, fin: 48, tech: 58, clim: 50, soc: 55, legal: 66 },
+  ],
+};
 
 const DISCLOSURE_SNIPPETS: Record<string, Array<{ co: string; text: string }>> = {
   cr2: [
@@ -87,7 +180,12 @@ export default function CorporatePulse() {
   const [selRisk, setSelRisk] = useState<string | null>(null);
 
   const idx = INDICES.find((i) => i.id === indexId) || INDICES[0];
-  const maxCite = Math.max(...CITED_RISKS.map((r) => r.cite));
+
+  // Dynamically load data corresponding to selected index
+  const citedRisks = CITED_RISKS_BY_INDEX[indexId] || CITED_RISKS_BY_INDEX.ftse100;
+  const sectorBreakdown = SECTOR_BREAKDOWN_BY_INDEX[indexId] || SECTOR_BREAKDOWN_BY_INDEX.ftse100;
+
+  const maxCite = Math.max(...citedRisks.map((r) => r.cite));
 
   const heatColor = (v: number) => {
     if (v >= 75) return { background: "var(--red-l)", color: "var(--red)" };
@@ -110,7 +208,10 @@ export default function CorporatePulse() {
             <select
               className="select"
               value={indexId}
-              onChange={(e) => setIndexId(e.target.value)}
+              onChange={(e) => {
+                setIndexId(e.target.value);
+                setSelRisk(null); // Reset drill-down selection when changing index
+              }}
             >
               {INDICES.map((i) => (
                 <option key={i.id} value={i.id}>
@@ -127,9 +228,7 @@ export default function CorporatePulse() {
           </div>
           <p>
             <b>Across {idx.filed} of {idx.companies} {idx.label} annual reports and filings swept this quarter,</b>{" "}
-            geopolitical instability, AI governance and tariff/trade policy are the fastest-rising
-            principal risks — AI governance has climbed six places and tariffs eight quarter-on-quarter.
-            Cyber security remains the single most-cited risk for a fourth consecutive quarter.
+            {idx.riserText}
           </p>
         </div>
 
@@ -141,20 +240,25 @@ export default function CorporatePulse() {
             sub={`of ${idx.companies} ${idx.label} constituents`}
             accent="var(--accent)"
           />
-          <StatTile label="Distinct risks tracked" value="38" sub="mapped to 8 domains" accent="var(--d-reg)" />
+          <StatTile 
+            label="Distinct risks tracked" 
+            value={idx.risksTracked.toString()} 
+            sub="mapped to 8 domains" 
+            accent="var(--d-reg)" 
+          />
           <StatTile
             label="Fastest riser"
-            value="▲ 6"
-            dir="up"
-            sub="AI governance · climbed to 8th"
-            accent="var(--d-tech)"
+            value={idx.fastestRiserValue}
+            dir={idx.fastestRiserDir}
+            sub={idx.fastestRiserSub}
+            accent={idx.fastestRiserAccent}
           />
           <StatTile
             label="Biggest faller"
-            value="▼ 2"
-            dir="down"
-            sub="Macro & inflation · fell to 4th"
-            accent="var(--d-fin)"
+            value={idx.biggestFallerValue}
+            dir={idx.biggestFallerDir}
+            sub={idx.biggestFallerSub}
+            accent={idx.biggestFallerAccent}
           />
         </div>
 
@@ -169,8 +273,10 @@ export default function CorporatePulse() {
                 </div>
               </div>
             </div>
+            {/* Key BumpChart forces redraw on indexId change */}
             <BumpChart
-              rows={CITED_RISKS.map((r) => ({
+              key={indexId}
+              rows={citedRisks.map((r) => ({
                 id: r.id,
                 domain: r.domain,
                 risk: r.risk,
@@ -190,7 +296,7 @@ export default function CorporatePulse() {
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {CITED_RISKS.slice(0, 10).map((r) => {
+              {citedRisks.slice(0, 10).map((r) => {
                 const mv = r.prevRank - r.rank;
                 return (
                   <div
@@ -240,7 +346,7 @@ export default function CorporatePulse() {
 
         {/* drill-down */}
         {selRisk && (() => {
-          const r = CITED_RISKS.find((x) => x.id === selRisk);
+          const r = citedRisks.find((x) => x.id === selRisk);
           if (!r) return null;
           const snippets = DISCLOSURE_SNIPPETS[selRisk];
           return (
@@ -363,7 +469,7 @@ export default function CorporatePulse() {
                 </tr>
               </thead>
               <tbody>
-                {SECTOR_BREAKDOWN.map((row) => (
+                {sectorBreakdown.map((row) => (
                   <tr key={row.sector} style={{ borderTop: "1px solid var(--border)" }}>
                     <td style={{ padding: 10, fontWeight: 500 }}>{row.sector}</td>
                     <td style={{ padding: 6, textAlign: "center" }}>
