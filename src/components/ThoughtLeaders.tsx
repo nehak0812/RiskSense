@@ -236,7 +236,7 @@ const REPORTS = [
     title: "Trade in Transition: Preparing for Patchwork World Order",
     date: "Jan 8, 2026",
     horizon: "24-month",
-    url: "https://www.bcg.com/publications/2026/trade-in-transition-patchwork-world-order",
+    url: "https://www.bcg.com/publications/2026/trade-in-transition-how-to-prepare-for-a-patchwork-world-order",
     topRisks: ["Supply-chain resilience", "Geopolitics", "Climate transition", "Tech disruption"],
     summary:
       "Stresses building structural supply-chain resilience against a backdrop of geopolitical fragmentation and accelerating climate-transition requirements.",
@@ -250,7 +250,7 @@ const REPORTS = [
     title: "Risk and Compliance 2026: Refining Oversight",
     date: "Mar 12, 2026",
     horizon: "2-year",
-    url: "https://www.bcg.com/capabilities/risk-management-compliance/insights",
+    url: "https://www.bcg.com/capabilities/risk-management-compliance/overview",
     topRisks: ["Regulatory divergence", "Geopolitical compliance", "GenAI security gaps", "Resilience auditing"],
     summary:
       "Discusses refining compliance frameworks for a volatile, AI-driven world. Recommends aligning risk oversight with emerging AI models and auditing geopolitical vulnerabilities.",
@@ -278,7 +278,7 @@ const REPORTS = [
     title: "Bain Global M&A Report 2026",
     date: "Jan 27, 2026",
     horizon: "2-year",
-    url: "https://www.bain.com/insights/topics/global-ma-report/",
+    url: "https://www.bain.com/insights/topics/mergers-and-acquisitions/",
     topRisks: ["Geopolitical deal friction", "AI capability acquisition", "Valuation volatility", "Regulatory review delays"],
     summary:
       "Highlights key M&A trends for corporate growth. Advises leaders to navigate protectionist foreign investment reviews and capture AI synergies with resilience.",
