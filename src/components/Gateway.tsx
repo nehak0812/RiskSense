@@ -18,6 +18,7 @@ const SCANNING_STEPS = [
   "Identifying peer benchmark group...",
 ];
 
+// Presets used as initial suggestions when search is empty
 const FORBES_2000 = [
   { name: "Brightwell plc", industry: "Consumer Health & FMCG", geographies: ["UK", "EU", "US"], peers: ["Reckitt", "Haleon", "Unilever"], meta: "FTSE 100 · LON: BWL", featured: true },
   { name: "JPMorgan Chase", industry: "Banking & Financial Services", geographies: ["US", "UK", "Global"], peers: ["Bank of America", "Citigroup", "Goldman Sachs", "Morgan Stanley"], meta: "NYSE: JPM" },
@@ -65,6 +66,10 @@ export default function Gateway({ onSelect }: GatewayProps) {
   const [step, setStep] = useState(0);
   const [dbOrgs, setDbOrgs] = useState<any[]>([]);
 
+  // Autocomplete states
+  const [isSearching, setIsSearching] = useState(false);
+  const [matches, setMatches] = useState<any[]>([]);
+
   // Scanning states
   const [isScanning, setIsScanning] = useState(false);
   const [scanStep, setScanStep] = useState(0);
@@ -97,7 +102,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
     };
   }, []);
 
-  // Fetch already onboarded companies
+  // Fetch already onboarded companies from SQLite
   useEffect(() => {
     fetch("/api/orgs")
       .then((res) => res.json())
@@ -109,54 +114,36 @@ export default function Gateway({ onSelect }: GatewayProps) {
       .catch((err) => console.error("Error fetching db orgs:", err));
   }, []);
 
-  const combinedSuggestions = React.useMemo(() => {
-    const list = [...dbOrgs];
-    FORBES_2000.forEach((sug) => {
-      if (!list.some((o) => o.name.toLowerCase() === sug.name.toLowerCase())) {
-        list.push({
-          id: sug.name.replace(/\s+/g, "-").toLowerCase(),
-          name: sug.name,
-          industry: sug.industry,
-          geographies: JSON.stringify(sug.geographies),
-          peers: JSON.stringify(sug.peers),
-          meta: sug.meta,
-          featured: sug.featured || false,
-        });
-      }
-    });
-    return list;
-  }, [dbOrgs]);
-
-  const matches = React.useMemo(() => {
-    if (!q.trim()) return [];
-    const lowercaseQ = q.toLowerCase();
-    const filtered = combinedSuggestions.filter(
-      (o) =>
-        o.name.toLowerCase().includes(lowercaseQ) ||
-        o.industry.toLowerCase().includes(lowercaseQ)
-    );
-
-    const exactMatch = combinedSuggestions.some(
-      (o) => o.name.toLowerCase() === lowercaseQ
-    );
-
-    const list = [...filtered];
-
-    // Append "+ Onboard custom company" option if there's no exact match
-    if (!exactMatch && q.trim().length > 0) {
-      list.push({
-        id: "custom-onboard",
-        name: q.trim(),
-        industry: "Custom Organisation",
-        geographies: JSON.stringify(["Global"]),
-        peers: JSON.stringify(["Competitor A", "Competitor B"]),
-        meta: "Onboard new custom company",
-        isCustomSuggestion: true,
-      } as any);
+  // Live Wikidata Autocomplete Lookup with 350ms debounce
+  useEffect(() => {
+    if (q.trim().length < 2) {
+      setMatches([]);
+      setIsSearching(false);
+      return;
     }
 
-    return list;
-  }, [q, combinedSuggestions]);
+    setIsSearching(true);
+    const delayDebounceFn = setTimeout(() => {
+      fetch(`/api/company-search?q=${encodeURIComponent(q)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setMatches(data);
+          } else {
+            setMatches([]);
+          }
+          setIsSearching(false);
+          setHl(0);
+        })
+        .catch((err) => {
+          console.error("Error fetching company suggestions:", err);
+          setMatches([]);
+          setIsSearching(false);
+        });
+    }, 350);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [q]);
 
   // Dynamically update industry list to support any custom industry classification returned by agent
   const currentIndustries = React.useMemo(() => {
@@ -214,21 +201,17 @@ export default function Gateway({ onSelect }: GatewayProps) {
       setFormGeographies(
         Array.isArray(data.geographies)
           ? data.geographies.join(", ")
-          : company.geographies
-          ? (Array.isArray(JSON.parse(company.geographies)) ? JSON.parse(company.geographies).join(", ") : company.geographies)
           : "US, EU, UK"
       );
       setFormPeers(
         Array.isArray(data.peers)
           ? data.peers.join(", ")
-          : company.peers
-          ? (Array.isArray(JSON.parse(company.peers)) ? JSON.parse(company.peers).join(", ") : company.peers)
           : "Competitor A, Competitor B"
       );
       setIsScanning(false);
       setShowFormDetails(true);
     } catch (err) {
-      console.warn("Fallback to static presets due to scan error:", err);
+      console.warn("Fallback to static presets/defaults due to scan error:", err);
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, 2000 - elapsed);
       await new Promise((resolve) => setTimeout(resolve, remaining));
@@ -236,28 +219,13 @@ export default function Gateway({ onSelect }: GatewayProps) {
       clearInterval(scanInterval);
       setScanStep(SCANNING_STEPS.length);
 
-      // Parse geometries & peers from presets safely
-      let parsedGeo = "US, EU, UK";
-      let parsedPeers = "Competitor A, Competitor B";
-
-      try {
-        if (company.geographies) {
-          const geoParsed = typeof company.geographies === "string" ? JSON.parse(company.geographies) : company.geographies;
-          parsedGeo = Array.isArray(geoParsed) ? geoParsed.join(", ") : company.geographies;
-        }
-      } catch (_) {}
-
-      try {
-        if (company.peers) {
-          const peersParsed = typeof company.peers === "string" ? JSON.parse(company.peers) : company.peers;
-          parsedPeers = Array.isArray(peersParsed) ? peersParsed.join(", ") : company.peers;
-        }
-      } catch (_) {}
-
+      // Check if this matches one of our local preset configurations
+      const preset = FORBES_2000.find(p => p.name.toLowerCase() === company.name.toLowerCase());
+      
       setFormName(company.name);
-      setFormIndustry(company.industry || "Consumer Health & FMCG");
-      setFormGeographies(parsedGeo);
-      setFormPeers(parsedPeers);
+      setFormIndustry(preset?.industry || "Consumer Health & FMCG");
+      setFormGeographies(preset?.geographies.join(", ") || "US, EU, UK");
+      setFormPeers(preset?.peers.join(", ") || "Competitor A, Competitor B");
       setIsScanning(false);
       setShowFormDetails(true);
     }
@@ -394,23 +362,26 @@ export default function Gateway({ onSelect }: GatewayProps) {
           </h1>
 
           <p className="gateway-sub" style={{ marginTop: 10, marginBottom: 24 }}>
-            Search for an organisation or input parameters below. The scanning agent will search external feeds, analyze disclosures, and build your custom Corporate Lens and Exposure Map profile.
+            Search for an organisation below. The scanning agent will search external feeds, analyze disclosures, and build your custom Corporate Lens and Exposure Map profile.
           </p>
 
           {/* Search Box with Suggestions */}
           <div className="gw-search" style={{ position: "relative" }}>
             <span className="s-ico">
-              <Icon name="search" size={19} />
+              {isSearching ? (
+                <div className="spinner" style={{ width: 18, height: 18, borderWidth: 2, borderColor: "var(--text3)" }}></div>
+              ) : (
+                <Icon name="search" size={19} />
+              )}
             </span>
             <input
               ref={inputRef}
               className="input"
-              placeholder="Search for a company (e.g. Unilever, JPMorgan Chase, Apple)..."
+              placeholder="Search global companies (e.g. Unilever, JPMorgan Chase, Apple)..."
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
                 setOpen(true);
-                setHl(0);
               }}
               onFocus={() => {
                 setOpen(true);
@@ -431,58 +402,51 @@ export default function Gateway({ onSelect }: GatewayProps) {
               }}
             />
 
-            {open && matches.length > 0 && (
+            {open && q.trim().length >= 2 && (
               <div ref={dropdownRef} className="gw-suggest" style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, maxHeight: 300, overflowY: "auto" }}>
-                {matches.map((o: any, i) => (
-                  <div
-                    key={o.id + "-" + i}
-                    className={`gw-sug-item ${i === hl ? "hl" : ""}`}
-                    onMouseEnter={() => setHl(i)}
-                    onClick={() => handleSelectCompany(o)}
-                  >
+                {matches.length > 0 ? (
+                  matches.map((o: any, i) => (
                     <div
-                      className="mono"
-                      style={{
-                        background: o.featured ? "var(--accent)" : o.isCustomSuggestion ? "var(--emerald)" : "var(--slate)",
-                        width: 30,
-                        height: 30,
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "5px",
-                        fontWeight: 700,
-                      }}
+                      key={o.id + "-" + i}
+                      className={`gw-sug-item ${i === hl ? "hl" : ""}`}
+                      onMouseEnter={() => setHl(i)}
+                      onClick={() => handleSelectCompany(o)}
                     >
-                      {o.isCustomSuggestion ? "+" : o.name[0]}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="gw-sug-name" style={{ fontWeight: 600 }}>
-                        {o.isCustomSuggestion ? `Onboard custom: "${o.name}"` : o.name}
-                        {o.featured && (
-                          <span
-                            style={{
-                              fontSize: 9,
-                              fontWeight: 700,
-                              color: "var(--accent)",
-                              background: "var(--accent-l)",
-                              padding: "2px 6px",
-                              borderRadius: 4,
-                              marginLeft: 8,
-                              letterSpacing: ".4px",
-                            }}
-                          >
-                            DEMO
-                          </span>
-                        )}
+                      <div
+                        className="mono"
+                        style={{
+                          background: "var(--slate)",
+                          width: 30,
+                          height: 30,
+                          color: "#fff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "5px",
+                          fontWeight: 700,
+                          fontSize: 12,
+                        }}
+                      >
+                        {o.name ? o.name[0] : "?"}
                       </div>
-                      <div className="gw-sug-meta">
-                        {o.industry} · {o.meta || "Forbes 2000 Listed"}
+                      <div style={{ flex: 1 }}>
+                        <div className="gw-sug-name" style={{ fontWeight: 600 }}>
+                          {o.name}
+                        </div>
+                        <div className="gw-sug-meta" style={{ color: "var(--text3)", fontSize: 11, marginTop: 2 }}>
+                          {o.description}
+                        </div>
                       </div>
+                      <Icon name="arrowR" size={15} color="var(--text3)" />
                     </div>
-                    <Icon name="arrowR" size={15} color="var(--text3)" />
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  !isSearching && (
+                    <div style={{ padding: "16px", textAlign: "center", color: "var(--text3)", fontSize: 13 }}>
+                      No verified companies found. Please check spelling.
+                    </div>
+                  )
+                )}
               </div>
             )}
           </div>
@@ -618,10 +582,10 @@ export default function Gateway({ onSelect }: GatewayProps) {
             </form>
           )}
 
-          {/* Popular Forbes 2000 suggestions (Chips shown when form and scanning are hidden) */}
+          {/* Popular example choices (Chips shown when form and scanning are hidden) */}
           {!showFormDetails && !isScanning && (
             <div className="gw-examples" style={{ marginTop: 24 }}>
-              <div className="gw-ex-label">Select a Forbes 2000 company to scan:</div>
+              <div className="gw-ex-label">Or select a popular company:</div>
               <div className="gw-chips" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
                 {FORBES_2000.slice(0, 6).map((o) => (
                   <div key={o.name} className="gw-chip" onClick={() => handleSelectCompany(o)} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", background: "var(--bg3)", border: "1px solid var(--border2)", borderRadius: "6px" }}>
