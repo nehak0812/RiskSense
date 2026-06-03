@@ -73,7 +73,7 @@ export default function LandingPage({ onLaunchPlatform }: LandingPageProps) {
                 <span className="dot" style={{ background: "#27c93f" }}></span>
                 <div className="browser-url">
                   <Icon name="lock" size={10} />
-                  risklens.ey.com/platform
+                  risklens.com/platform
                 </div>
               </div>
               <div className="pv-body">
@@ -259,12 +259,12 @@ export default function LandingPage({ onLaunchPlatform }: LandingPageProps) {
       <footer style={{ borderTop: "1px solid var(--border)", padding: "26px 0", fontSize: 11, color: "var(--text3)", background: "var(--bg2)" }}>
         <div className="wrap" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            &copy; {new Date().getFullYear()} EY RiskLens. All rights reserved. Editorial prototype.
+            &copy; {new Date().getFullYear()} RiskLens. All rights reserved. Editorial prototype.
           </div>
           <div style={{ display: "flex", gap: 16 }}>
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Service</a>
-            <a href="#">EY Global Risk Consulting</a>
+            <a href="#">Global Risk Advisory</a>
           </div>
         </div>
       </footer>

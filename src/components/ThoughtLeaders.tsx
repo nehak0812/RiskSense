@@ -84,8 +84,8 @@ const REPORTS = [
   },
   {
     id: "r7",
-    publisher: "EY",
-    mark: "EY",
+    publisher: "KPMG",
+    mark: "KPMG",
     markColor: "var(--d-soc)",
     title: "Global Board Risk Survey",
     date: "Mar 2026",
