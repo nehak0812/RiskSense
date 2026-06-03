@@ -287,9 +287,9 @@ export default function DashboardShell({ onBackToLanding }: DashboardShellProps)
           </div>
         </div>
         <div className="lens-tabs">
-          <LensTab id="world" kicker="The" label="World" icon="globe" />
+          <LensTab id="world" kicker="Signal" label="Spectrum" icon="globe" />
           <div className="lens-divider"></div>
-          <LensTab id="yourworld" kicker="Your" label="World" icon="building" locked={!orgUnlocked} />
+          <LensTab id="yourworld" kicker="Corporate" label="Lens" icon="building" locked={!orgUnlocked} />
         </div>
         <div className="nav-right">
           <span className="live-badge">
@@ -305,13 +305,13 @@ export default function DashboardShell({ onBackToLanding }: DashboardShellProps)
         </div>
       </div>
 
-      {/* sub-nav for The World */}
+      {/* sub-nav for Signal Spectrum */}
       {lens === "world" && (
         <div className="subnav">
-          <span className="subnav-label">The World</span>
-          <SubTab id="today" label="The World Today" icon="zap" />
+          <span className="subnav-label">Signal Spectrum</span>
+          <SubTab id="today" label="Spectrum Feed" icon="zap" />
           <SubTab id="pulse" label="Corporate Risk Pulse" icon="building" />
-          <SubTab id="leaders" label="Thought Leaders' Voice" icon="bulb" />
+          <SubTab id="leaders" label="Expert Voices" icon="bulb" />
           <div className="subnav-right">
             <Icon name="filter" size={13} />
             Consistent risk-domain filtering across all views
@@ -323,11 +323,11 @@ export default function DashboardShell({ onBackToLanding }: DashboardShellProps)
           <span className="subnav-label">{org.name}</span>
           <div className={`subtab ${lens === "yourworld" ? "active" : ""}`} onClick={() => setLens("yourworld")}>
             <Icon name="building" size={14} />
-            Your World
+            Corporate Lens
           </div>
           <div className={`subtab ${lens === "intersection" ? "active" : ""}`} onClick={() => setLens("intersection")}>
             <Icon name="link" size={14} />
-            The Intersection
+            Exposure Map
           </div>
           <div className="subnav-right">
             <span className="pulse-dot"></span>

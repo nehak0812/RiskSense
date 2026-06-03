@@ -132,7 +132,7 @@ export default function IntersectionView({
                 <Icon name="link" size={18} />
               </div>
               <p>
-                <b>Where the world's signals collide with {org.name}'s footprint.</b> Of {matches.length} external
+                <b>Where the Signal Spectrum intersects with {org.name}'s Corporate Lens.</b> Of {matches.length} external
                 signals matched, {mattered.length} score as materially relevant to {org.name}'s markets, suppliers and
                 jurisdictions. Trade and regulatory signals dominate its exposure, concentrated in Europe and its South &
                 SE Asia sourcing base.
@@ -142,7 +142,7 @@ export default function IntersectionView({
             {/* signals that matter */}
             <div className="sec-split">
               <span className="badge" style={{ background: "var(--d-trade)" }}>
-                The Intersection
+                Exposure Map
               </span>
               <span className="stitle">Signals that matter to you</span>
               <span className="line"></span>

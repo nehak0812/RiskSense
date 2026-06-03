@@ -187,7 +187,7 @@ export default function ChatPanel({ open, onClose, org, onCiteClick }: ChatPanel
               <div className="chat-title">Risk Intelligence</div>
               <div className="chat-ctx">
                 <span className="dot"></span>
-                {org ? `Context: ${org.name}` : "Context: The World"}
+                {org ? `Context: ${org.name}` : "Context: Signal Spectrum"}
               </div>
             </div>
             <button className="nav-icon-btn" onClick={onClose} style={{ width: 30, height: 30 }}>

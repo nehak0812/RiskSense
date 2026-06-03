@@ -185,7 +185,7 @@ export default function ThoughtLeaders() {
         <div className="briefing-head" style={{ marginBottom: 10 }}>
           <div>
             <div className="eyebrow" style={{ marginBottom: 6 }}>
-              Thought Leaders' Voice
+              Expert Voices
             </div>
             <div className="briefing-title">What the risk authorities are elevating</div>
           </div>

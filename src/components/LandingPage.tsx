@@ -78,9 +78,9 @@ export default function LandingPage({ onLaunchPlatform }: LandingPageProps) {
               </div>
               <div className="pv-body">
                 <div className="pv-tabs">
-                  <span className="pv-tab on">The World</span>
-                  <span className="pv-tab">Your World</span>
-                  <span className="pv-tab">The Intersection</span>
+                  <span className="pv-tab on">Signal Spectrum</span>
+                  <span className="pv-tab">Corporate Lens</span>
+                  <span className="pv-tab">Exposure Map</span>
                 </div>
                 <div className="pv-kpis">
                   <div className="pv-kpi">

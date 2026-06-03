@@ -8,7 +8,7 @@ const ANALYSIS_STEPS = [
   "Matching signals to organisation footprint",
   "Benchmarking against sector peers",
   "Scoring & prioritising emerging risks",
-  "Compiling Your World workspace",
+  "Building Corporate Lens profile",
 ];
 
 const DEFAULT_SUGGESTIONS = [
@@ -210,7 +210,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
       <div className="gateway">
         <div className="gateway-inner fade-up" style={{ maxWidth: 640 }}>
           <div className="gateway-eyebrow">
-            <span className="eyebrow">Your World</span>
+            <span className="eyebrow">Corporate Lens</span>
           </div>
           
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -229,7 +229,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
           <p className="gateway-sub" style={{ marginTop: 10, marginBottom: 24 }}>
             {showForm
               ? "Provide your organisation's details to run a semantic vector search across global risk feeds, fetch peer disclosures, and map custom risk exposure."
-              : "Choose an organisation to unlock Your World and The Intersection — its own disclosed risk profile, peer benchmarking, and the external signals scored for relevance."}
+              : "Choose an organisation to unlock Corporate Lens and Exposure Map — its own disclosed risk profile, peer benchmarking, and the external signals scored for relevance."}
           </p>
 
           {showForm ? (
