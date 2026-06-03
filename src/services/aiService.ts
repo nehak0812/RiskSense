@@ -58,17 +58,47 @@ export async function searchWeb(query: string, timeRange?: string, topic: "gener
 // 2. Gemini Text Embeddings
 export async function getEmbedding(text: string): Promise<number[]> {
   if (!genAI) {
-    // Generate a simple pseudo-random embedding vector of 1536 dims (e.g. hash-based)
+    const lowercase = text.toLowerCase();
+    const bias = [0, 0, 0, 0, 0, 0];
+    
+    // Categorize using key phrases to build domain bias
+    if (lowercase.includes("geopol") || lowercase.includes("tariff") || lowercase.includes("sanction") || lowercase.includes("border") || lowercase.includes("national security") || lowercase.includes("polic") || lowercase.includes("suez") || lowercase.includes("panama") || lowercase.includes("war ") || lowercase.includes("conflict")) {
+      bias[0] = 1.0;
+    }
+    if (lowercase.includes("regul") || lowercase.includes("complian") || lowercase.includes("law") || lowercase.includes("act") || lowercase.includes("commission") || lowercase.includes("standard") || lowercase.includes("audit") || lowercase.includes("legal") || lowercase.includes("court") || lowercase.includes("non-compliance") || lowercase.includes("approval") || lowercase.includes("trial") || lowercase.includes("patent")) {
+      bias[1] = 1.0;
+    }
+    if (lowercase.includes("techno") || lowercase.includes("ai") || lowercase.includes("cyber") || lowercase.includes("hack") || lowercase.includes("software") || lowercase.includes("server") || lowercase.includes("ransomware") || lowercase.includes("digital") || lowercase.includes("gpu") || lowercase.includes("data center") || lowercase.includes("ciso") || lowercase.includes("information security")) {
+      bias[2] = 1.0;
+    }
+    if (lowercase.includes("supply") || lowercase.includes("logist") || lowercase.includes("ship") || lowercase.includes("deliver") || lowercase.includes("cargo") || lowercase.includes("port") || lowercase.includes("warehouse") || lowercase.includes("procure") || lowercase.includes("transit") || lowercase.includes("route") || lowercase.includes("bottleneck") || lowercase.includes("truck")) {
+      bias[3] = 1.0;
+    }
+    if (lowercase.includes("climate") || lowercase.includes("water") || lowercase.includes("carbon") || lowercase.includes("environment") || lowercase.includes("nature") || lowercase.includes("sustainab") || lowercase.includes("drought") || lowercase.includes("flood") || lowercase.includes("emiss") || lowercase.includes("deforest") || lowercase.includes("waste")) {
+      bias[4] = 1.0;
+    }
+    if (lowercase.includes("financial") || lowercase.includes("inflation") || lowercase.includes("interest") || lowercase.includes("budget") || lowercase.includes("market") || lowercase.includes("cost") || lowercase.includes("revenue") || lowercase.includes("rate") || lowercase.includes("margin") || lowercase.includes("commodity") || lowercase.includes("price") || lowercase.includes("squeeze")) {
+      bias[5] = 1.0;
+    }
+
+    // Seeded deterministic random generation
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = (hash << 5) - hash + text.charCodeAt(i);
+      hash |= 0;
+    }
+    let seed = Math.abs(hash) || 7;
+
     const mockEmbedding = Array.from({ length: 1536 }, (_, idx) => {
-      // Deterministic based on text content
-      let hash = 0;
-      for (let i = 0; i < text.length; i++) {
-        hash = (hash << 5) - hash + text.charCodeAt(i);
-        hash |= 0;
+      if (idx < 6) {
+        return bias[idx] * 2.5; // Amplify domain bias coordinate
       }
-      return Math.sin(hash + idx) * 0.1;
+      seed = (seed * 9301 + 49297) % 233280;
+      return (seed / 233280) - 0.5; // Noise between -0.5 and 0.5
     });
-    return mockEmbedding;
+
+    const magnitude = Math.sqrt(mockEmbedding.reduce((sum, val) => sum + val * val, 0));
+    return mockEmbedding.map(val => val / (magnitude || 1));
   }
 
   try {
@@ -805,6 +835,187 @@ export async function fetchRisksForCompany(
   } catch (error) {
     console.error("Error generating risks with Gemini:", error);
     return defaultPayload;
+  }
+}
+
+export interface SignalRelevance {
+  relevant: boolean;
+  relevanceScore: number;
+  rationale: string;
+  linkedRiskCode: string;
+}
+
+export function isSignalRelevantMock(
+  companyName: string,
+  industry: string,
+  geographies: string[],
+  peers: string[],
+  title: string,
+  summary: string,
+  category: string
+): SignalRelevance {
+  const titleLower = title.toLowerCase();
+  const summaryLower = summary.toLowerCase();
+  const indLower = industry.toLowerCase();
+  
+  // Default is not relevant
+  let relevant = false;
+  let score = 0;
+  let rationale = "";
+  let linkedRiskCode = "RR-01";
+
+  // Check categories and keywords
+  if (indLower.includes("transport") || indLower.includes("logistics")) {
+    if (titleLower.includes("shipping") || titleLower.includes("canal") || titleLower.includes("suez") || titleLower.includes("panama") || titleLower.includes("port") || titleLower.includes("route") || titleLower.includes("logistics") || titleLower.includes("container") || titleLower.includes("fuel") || titleLower.includes("carbon") || titleLower.includes("emission") || titleLower.includes("transit") || titleLower.includes("truck") || titleLower.includes("freight")) {
+      relevant = true;
+      score = 8.2;
+      linkedRiskCode = titleLower.includes("canal") || titleLower.includes("suez") || titleLower.includes("panama") ? "RR-03" : (titleLower.includes("carbon") || titleLower.includes("emission") ? "RR-01" : "RR-04");
+      
+      if (titleLower.includes("canal") || titleLower.includes("suez") || titleLower.includes("panama")) {
+        rationale = `Geopolitical shipping lane bottlenecks directly impact global routing schedules and inventory turnover for ${companyName}'s logistics operations.`;
+      } else if (titleLower.includes("carbon") || titleLower.includes("emission")) {
+        rationale = `Tighter transport emission standards increase operating compliance costs and accelerate fleet modernization pressures for ${companyName}.`;
+      } else {
+        rationale = `Operational supply chain disruptions or port congestion directly threaten ${companyName}'s core logistics performance and customer SLA commitments.`;
+      }
+    }
+  } else if (indLower.includes("consumer") || indLower.includes("fmcg") || indLower.includes("retail")) {
+    if (titleLower.includes("deforest") || titleLower.includes("eudr") || titleLower.includes("supply chain") || titleLower.includes("cocoa") || titleLower.includes("palm") || titleLower.includes("inflation") || titleLower.includes("consumer") || titleLower.includes("waste") || titleLower.includes("package") || titleLower.includes("carbon") || titleLower.includes("water") || titleLower.includes("drought")) {
+      relevant = true;
+      score = 7.9;
+      linkedRiskCode = titleLower.includes("deforest") || titleLower.includes("eudr") ? "RR-01" : (titleLower.includes("water") || titleLower.includes("drought") ? "RR-05" : "RR-04");
+      
+      if (titleLower.includes("deforest") || titleLower.includes("eudr")) {
+        rationale = `Impending deforestation regulations enforce strict supplier audits and raw material trace requirements on ${companyName}'s consumer product supply chains.`;
+      } else if (titleLower.includes("water") || titleLower.includes("drought")) {
+        rationale = `Extreme water stress in manufacturing regions raises raw material production volatility and packaging supply chain delays for ${companyName}.`;
+      } else {
+        rationale = `Macro inflation and consumer demand shifts directly pressure operating margins and retail distribution channels for ${companyName}.`;
+      }
+    }
+  } else if (indLower.includes("tech") || indLower.includes("telecom")) {
+    if (titleLower.includes("ai act") || titleLower.includes("cyber") || titleLower.includes("hack") || titleLower.includes("outage") || titleLower.includes("server") || titleLower.includes("chip") || titleLower.includes("semiconductor") || titleLower.includes("gpu") || titleLower.includes("data center")) {
+      relevant = true;
+      score = 8.5;
+      linkedRiskCode = titleLower.includes("ai act") ? "RR-01" : (titleLower.includes("cyber") || titleLower.includes("hack") || titleLower.includes("outage") ? "RR-02" : "RR-04");
+      
+      if (titleLower.includes("ai act")) {
+        rationale = `Tightening AI safety and transparency rules directly affect model training requirements and regulatory overhead for ${companyName}.`;
+      } else if (titleLower.includes("cyber") || titleLower.includes("hack") || titleLower.includes("outage")) {
+        rationale = `Infrastructural disruption or data breach threats compromise customer reliability and violate SLA commitments on ${companyName}'s digital platforms.`;
+      } else {
+        rationale = `Hardware supply bottlenecks or chip export rules directly limit scale-out capacity and cloud infrastructure expansion for ${companyName}.`;
+      }
+    }
+  } else if (indLower.includes("banking") || indLower.includes("financial")) {
+    if (titleLower.includes("interest rate") || titleLower.includes("inflation") || titleLower.includes("liquidity") || titleLower.includes("cyber") || titleLower.includes("ranso") || titleLower.includes("esg") || titleLower.includes("disclosure") || titleLower.includes("sanction")) {
+      relevant = true;
+      score = 8.0;
+      linkedRiskCode = titleLower.includes("cyber") || titleLower.includes("ranso") ? "RR-02" : (titleLower.includes("interest") || titleLower.includes("liquidity") ? "RR-06" : "RR-01");
+      
+      if (titleLower.includes("cyber") || titleLower.includes("ranso")) {
+        rationale = `Systemic cyber attacks threaten secure transaction processing systems and database integrity for ${companyName}'s banking operations.`;
+      } else if (titleLower.includes("interest") || titleLower.includes("liquidity")) {
+        rationale = `Rate volatility and credit exposure pressure interest margins and test liquidity reserves for ${companyName}.`;
+      } else {
+        rationale = `Compliance with cross-border sanctions and reporting mandates increases risk management overhead and auditor oversight for ${companyName}.`;
+      }
+    }
+  } else if (indLower.includes("life sciences") || indLower.includes("healthcare") || indLower.includes("pharmaceuticals")) {
+    if (titleLower.includes("drug") || titleLower.includes("trial") || titleLower.includes("patent") || titleLower.includes("clinical") || titleLower.includes("fda") || titleLower.includes("ema") || titleLower.includes("healthcare") || titleLower.includes("medical") || titleLower.includes("cyber")) {
+      relevant = true;
+      score = 8.3;
+      linkedRiskCode = titleLower.includes("cyber") ? "RR-02" : (titleLower.includes("drug") || titleLower.includes("trial") || titleLower.includes("clinical") ? "RR-01" : "RR-04");
+      
+      if (titleLower.includes("drug") || titleLower.includes("trial") || titleLower.includes("clinical")) {
+        rationale = `Regulatory reviews and clinical trial requirements govern patent timelines and product pipeline approvals for ${companyName}.`;
+      } else {
+        rationale = `IP security and digital supply chain integrity are critical to protecting ${companyName}'s proprietary biotech models.`;
+      }
+    }
+  }
+
+  // General fallback relevance check
+  if (!relevant) {
+    // If the signal matches the industry name or has keywords
+    const keywords = [companyName.toLowerCase(), ...peers.map(p => p.toLowerCase())];
+    const matchesKeyword = keywords.some(k => titleLower.includes(k) || summaryLower.includes(k));
+    
+    if (matchesKeyword) {
+      relevant = true;
+      score = 7.5;
+      rationale = `Direct mention of ${companyName} or its competitors highlights immediate competitive, operational, or brand impact.`;
+      linkedRiskCode = "RR-06";
+    }
+  }
+
+  return { relevant, relevanceScore: score, rationale, linkedRiskCode };
+}
+
+export async function evaluateSignalRelevance(
+  companyName: string,
+  industry: string,
+  geographies: string[],
+  peers: string[],
+  signalTitle: string,
+  signalSummary: string,
+  signalCategory: string
+): Promise<SignalRelevance> {
+  if (!genAI) {
+    return isSignalRelevantMock(companyName, industry, geographies, peers, signalTitle, signalSummary, signalCategory);
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: { responseMimeType: "application/json" },
+    });
+
+    const prompt = `
+      You are an expert enterprise risk analyst. Evaluate the relevance of the following external event/news signal to the company:
+      Company: "${companyName}"
+      Industry: "${industry}"
+      Geographies: ${JSON.stringify(geographies)}
+      Peers: ${JSON.stringify(peers)}
+
+      Signal Details:
+      - Title: "${signalTitle}"
+      - Summary/Content: "${signalSummary}"
+      - Original Category: "${signalCategory}"
+
+      Assess:
+      1. Is this signal relevant to this company? (Set relevant to true if it impacts their operations, supply chain, regulatory environment, macroeconomics, or peer group, and false otherwise).
+      2. Relevance score: A float between 0.0 and 10.0 (where 10.0 is critical direct impact and 0.0 is completely irrelevant).
+      3. Rationale: A specific, custom 1-2 sentence explanation of *exactly* why this matters to "${companyName}" based on their specific industry, geographies, or peers. Avoid generic placeholders. Do NOT use generic text like "Material regulatory requirements". Connect the signal facts to the company's specific business model context.
+      4. Linked Risk Code: Select the most appropriate risk code from the company's register (RR-01 to RR-06) that this signal impacts. Map it to one of:
+         - "RR-01" (Regulatory)
+         - "RR-02" (Technology & AI)
+         - "RR-03" (Geopolitical)
+         - "RR-04" (Supply chain)
+         - "RR-05" (Climate & nature)
+         - "RR-06" (Financial & macro)
+
+      Format the response strictly as a JSON object matching this structure:
+      {
+        "relevant": true,
+        "relevanceScore": 8.5,
+        "rationale": "Your detailed custom rationale here",
+        "linkedRiskCode": "RR-04"
+      }
+    `;
+
+    const response = await model.generateContent(prompt);
+    const responseText = response.response.text();
+    const cleanJson = JSON.parse(responseText.trim());
+    return {
+      relevant: typeof cleanJson.relevant === "boolean" ? cleanJson.relevant : true,
+      relevanceScore: typeof cleanJson.relevanceScore === "number" ? cleanJson.relevanceScore : 7.0,
+      rationale: cleanJson.rationale || "Relevant regulatory event impacting operations.",
+      linkedRiskCode: cleanJson.linkedRiskCode || "RR-01"
+    };
+  } catch (error) {
+    console.error("Error evaluating signal relevance with Gemini:", error);
+    return isSignalRelevantMock(companyName, industry, geographies, peers, signalTitle, signalSummary, signalCategory);
   }
 }
 

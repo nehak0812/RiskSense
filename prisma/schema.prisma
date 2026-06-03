@@ -63,6 +63,7 @@ model SignalMatch {
   organisation   Organisation  @relation(fields: [organisationId], references: [id], onDelete: Cascade)
   relevanceScore Float
   linkedRiskIds  String        // JSON array of strings
+  rationale      String?
   matchedAt      DateTime      @default(now())
 }
 

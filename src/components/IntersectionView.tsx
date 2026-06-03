@@ -36,9 +36,20 @@ export default function IntersectionView({
   const mattered = useMemo(() => {
     const list: any[] = [];
     matches.forEach((m: any) => {
-      // Find a risk in the organisation that has the same category as the signal's domain
-      const sigDomainId = getDomainIdForCategory(m.signal.domain);
-      const linkedRisk = org.risks.find((r: any) => getDomainIdForCategory(r.category) === sigDomainId) || org.risks[0];
+      // Try to find the linked risk using match's linkedRiskIds first
+      let linkedRisk = null;
+      try {
+        const ids = JSON.parse(m.linkedRiskIds || "[]");
+        if (ids.length > 0) {
+          linkedRisk = org.risks.find((r: any) => r.id === ids[0] || r.code === ids[0]);
+        }
+      } catch (e) {}
+
+      // Fallback to category-based matching if not explicitly linked
+      if (!linkedRisk) {
+        const sigDomainId = getDomainIdForCategory(m.signal.domain);
+        linkedRisk = org.risks.find((r: any) => getDomainIdForCategory(r.category) === sigDomainId) || org.risks[0];
+      }
 
       if (linkedRisk) {
         list.push({
@@ -46,6 +57,7 @@ export default function IntersectionView({
           signal: m.signal,
           risk: linkedRisk,
           relevance: Math.round(m.relevanceScore * 10),
+          rationale: m.rationale,
         });
       }
     });
@@ -152,7 +164,7 @@ export default function IntersectionView({
               <div className="empty">No relevant matched signals found in this period.</div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(420px,1fr))", gap: 12, marginBottom: 24 }}>
-                {mattered.map(({ id, signal: s, risk, relevance }) => {
+                {mattered.map(({ id, signal: s, risk, relevance, rationale }) => {
                   const domainId = getDomainIdForCategory(s.domain);
                   return (
                     <div
@@ -185,7 +197,7 @@ export default function IntersectionView({
                           {s.title}
                         </div>
                         <div className="matter-rationale">
-                          <b>Why this matters to you:</b> {risk?.why || "Material regulatory requirements impacting corporate compliance deadlines."}
+                          <b>Why this matters to you:</b> {rationale || risk?.why || "Material regulatory requirements impacting corporate compliance deadlines."}
                         </div>
                         {risk && (
                           <div

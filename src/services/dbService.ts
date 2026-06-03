@@ -6,6 +6,7 @@ import {
   cosineSimilarity,
   generateBoardSummary,
   fetchRisksForCompany,
+  evaluateSignalRelevance,
 } from "./aiService";
 
 // Prisma client initialization
@@ -296,33 +297,84 @@ export async function runOrganisationAnalysis(orgId: string) {
 
   // Retrieve all signals and compute in-memory cosine similarities
   const allSignals = await prisma.signal.findMany();
-  const matchedSignals = [];
+  const scoredSignals = [];
 
   for (const signal of allSignals) {
     if (!signal.embeddingString) continue;
     const signalEmbedding = JSON.parse(signal.embeddingString) as number[];
     const score = cosineSimilarity(orgProfileEmbedding, signalEmbedding);
+    scoredSignals.push({ signal, score });
+  }
 
-    // If similarity is above 0.35, match it!
-    if (score > 0.35) {
+  // Sort by similarity descending and select top 15 candidates
+  scoredSignals.sort((a, b) => b.score - a.score);
+  const candidates = scoredSignals.slice(0, 15);
+  const matchedSignals = [];
+  const activeMatchIds: string[] = [];
+
+  const geosArray = JSON.parse(org.geographies || "[]") as string[];
+
+  // Run high-fidelity LLM assessment on the candidates
+  for (const item of candidates) {
+    const { signal, score } = item;
+    
+    // Evaluate relevance using Gemini (or fallback mock)
+    const assessment = await evaluateSignalRelevance(
+      org.name,
+      industry,
+      geosArray,
+      peers,
+      signal.title,
+      signal.summary || signal.body || "",
+      signal.domain
+    );
+
+    if (assessment.relevant && assessment.relevanceScore > 0) {
+      // Find the linked risk in the register by code (e.g. RR-01) for this organisation
+      const matchedRisk = await prisma.risk.findFirst({
+        where: { organisationId: orgId, code: assessment.linkedRiskCode }
+      });
+      const linkedRiskIds = matchedRisk ? [matchedRisk.id] : [];
+
       // Check if match already exists
       let match = await prisma.signalMatch.findFirst({
         where: { organisationId: orgId, signalId: signal.id },
       });
 
-      if (!match) {
+      if (match) {
+        match = await prisma.signalMatch.update({
+          where: { id: match.id },
+          data: {
+            relevanceScore: assessment.relevanceScore,
+            linkedRiskIds: JSON.stringify(linkedRiskIds),
+            rationale: assessment.rationale
+          }
+        });
+      } else {
         match = await prisma.signalMatch.create({
           data: {
             organisationId: orgId,
             signalId: signal.id,
-            relevanceScore: parseFloat((score * 10).toFixed(2)),
-            linkedRiskIds: JSON.stringify([]),
+            relevanceScore: assessment.relevanceScore,
+            linkedRiskIds: JSON.stringify(linkedRiskIds),
+            rationale: assessment.rationale
           },
         });
       }
+      activeMatchIds.push(match.id);
       matchedSignals.push({ signal, match });
     }
   }
+
+  // Clean up any old matches that are no longer validated as relevant
+  await prisma.signalMatch.deleteMany({
+    where: {
+      organisationId: orgId,
+      NOT: {
+        id: { in: activeMatchIds }
+      }
+    }
+  });
 
   // Fetch peer disclosures via search
   for (const peer of peers) {
