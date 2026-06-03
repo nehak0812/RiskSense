@@ -245,7 +245,7 @@ export async function runOrganisationAnalysis(orgId: string) {
 
   // Stage 1: Ingest via Tavily Web Search API
   const query = `${org.name} ${industry} emerging risks news 2026`;
-  const searchResults = await searchWeb(query);
+  const searchResults = await searchWeb(query, "week", "news");
 
   const newSignals = [];
 
@@ -461,7 +461,7 @@ export async function getOrganisationViewData(orgId: string) {
 
 async function sweepQuery(query: string) {
   try {
-    const searchResults = await searchWeb(query, "week");
+    const searchResults = await searchWeb(query, "week", "news");
     for (const result of searchResults) {
       try {
         if (!result.url) continue;

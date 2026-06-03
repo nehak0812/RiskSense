@@ -21,7 +21,7 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 }
 
 // 1. Tavily Web Search API
-export async function searchWeb(query: string, timeRange?: string): Promise<any[]> {
+export async function searchWeb(query: string, timeRange?: string, topic: "general" | "news" = "general"): Promise<any[]> {
   if (!tavilyApiKey) {
     console.warn("TAVILY_API_KEY not found. Returning mock search results.");
     return getMockSearchResults(query);
@@ -39,6 +39,7 @@ export async function searchWeb(query: string, timeRange?: string): Promise<any[
         search_depth: "advanced",
         max_results: 6,
         time_range: timeRange || undefined,
+        topic: topic,
       }),
     });
 
