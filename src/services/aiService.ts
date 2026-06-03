@@ -269,7 +269,7 @@ export async function fetchCompanyInfo(companyName: string, description: string 
   // High-fidelity fallback dictionary mapping names to precise industries, country-level geographies, and peers
   const COMPANY_DICTIONARY: Record<string, Omit<CompanyInfo, "name">> = {
     "astrazeneca": {
-      industry: "Pharmaceuticals",
+      industry: "Life Sciences & Healthcare",
       geographies: ["United Kingdom", "Sweden", "United States", "Germany"],
       peers: ["GSK", "Pfizer", "Novartis", "Roche", "Sanofi"]
     },
@@ -339,27 +339,27 @@ export async function fetchCompanyInfo(companyName: string, description: string 
       peers: ["Shell", "ExxonMobil", "Chevron", "Saudi Aramco"]
     },
     "unilever": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["United Kingdom", "Netherlands", "United States", "India"],
       peers: ["Nestlé", "Procter & Gamble", "Reckitt", "Danone"]
     },
     "nestle": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["Switzerland", "United States", "France", "Germany"],
       peers: ["Unilever", "Procter & Gamble", "Danone", "Mondelēz"]
     },
     "nestlé": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["Switzerland", "United States", "France", "Germany"],
       peers: ["Unilever", "Procter & Gamble", "Danone", "Mondelēz"]
     },
     "novartis": {
-      industry: "Pharmaceuticals",
+      industry: "Life Sciences & Healthcare",
       geographies: ["Switzerland", "United States", "Germany", "Japan"],
       peers: ["Roche", "Pfizer", "Merck", "AstraZeneca"]
     },
     "brightwell": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["United Kingdom", "United States", "Germany"],
       peers: ["Reckitt", "Haleon", "Unilever"]
     },
@@ -374,7 +374,7 @@ export async function fetchCompanyInfo(companyName: string, description: string 
       peers: ["DHL", "FedEx", "DSV"]
     },
     "veridian": {
-      industry: "Pharmaceuticals",
+      industry: "Life Sciences & Healthcare",
       geographies: ["United Kingdom", "United States"],
       peers: ["GSK", "AstraZeneca", "Pfizer"]
     },
@@ -384,7 +384,7 @@ export async function fetchCompanyInfo(companyName: string, description: string 
       peers: ["Siemens", "General Electric", "Honeywell"]
     },
     "lvmh": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["France", "United States", "Italy", "Japan"],
       peers: ["Kering", "Richemont", "Hermès", "Chanel"]
     },
@@ -404,12 +404,12 @@ export async function fetchCompanyInfo(companyName: string, description: string 
       peers: ["General Electric", "ABB", "Schneider Electric", "Honeywell"]
     },
     "gsk": {
-      industry: "Pharmaceuticals",
+      industry: "Life Sciences & Healthcare",
       geographies: ["United Kingdom", "United States", "Belgium", "Germany"],
       peers: ["AstraZeneca", "Pfizer", "Sanofi", "Novartis"]
     },
     "glaxosmithkline": {
-      industry: "Pharmaceuticals",
+      industry: "Life Sciences & Healthcare",
       geographies: ["United Kingdom", "United States", "Belgium", "Germany"],
       peers: ["AstraZeneca", "Pfizer", "Sanofi", "Novartis"]
     },
@@ -424,32 +424,32 @@ export async function fetchCompanyInfo(companyName: string, description: string 
       peers: ["Citigroup", "Standard Chartered", "Barclays", "BNP Paribas"]
     },
     "tesco": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["United Kingdom", "Ireland"],
       peers: ["Sainsbury's", "Asda", "Morrisons", "Aldi"]
     },
     "mondelez": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["United States", "Switzerland", "United Kingdom", "Canada"],
       peers: ["Nestlé", "PepsiCo", "The Hershey Company", "Mars", "Unilever"]
     },
     "pepsico": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["United States", "United Kingdom", "Mexico", "Canada"],
       peers: ["Coca-Cola", "Keurig Dr Pepper", "Nestlé", "Mondelez International"]
     },
     "coca-cola": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["United States", "United Kingdom", "Germany", "Mexico"],
       peers: ["PepsiCo", "Keurig Dr Pepper", "Nestlé", "Danone"]
     },
     "nike": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["United States", "China", "Vietnam", "Netherlands"],
       peers: ["Adidas", "Puma", "Under Armour", "Lululemon"]
     },
     "adidas": {
-      industry: "Consumer Health & FMCG",
+      industry: "Consumer & FMCG",
       geographies: ["Germany", "United States", "China", "Vietnam"],
       peers: ["Nike", "Puma", "Under Armour", "Lululemon"]
     }
@@ -467,15 +467,21 @@ export async function fetchCompanyInfo(companyName: string, description: string 
     };
   } else {
     // Determine default industry based on Wikidata description keywords
-    let detectedIndustry = "Consumer Health & FMCG";
+    let detectedIndustry = "Consumer & FMCG";
     let detectedPeers = ["Nestlé", "Unilever", "Procter & Gamble", "Danone"];
     const descText = (description || "").toLowerCase();
 
     if (descText.includes("bank") || descText.includes("financ") || descText.includes("insurance") || descText.includes("investment")) {
       detectedIndustry = "Banking & Financial Services";
       detectedPeers = ["JPMorgan Chase", "HSBC", "Goldman Sachs", "Bank of America"];
+    } else if (descText.includes("consulting") || descText.includes("advisory") || descText.includes("audit") || descText.includes("accounting") || descText.includes("professional services") || descText.includes("law firm")) {
+      detectedIndustry = "Professional Services";
+      detectedPeers = ["Accenture", "Deloitte", "PwC", "EY", "KPMG", "McKinsey", "Boston Consulting Group"];
+    } else if (descText.includes("media") || descText.includes("entertainment") || descText.includes("streaming") || descText.includes("movie") || descText.includes("film") || descText.includes("music") || descText.includes("television")) {
+      detectedIndustry = "Media & Entertainment";
+      detectedPeers = ["The Walt Disney Company", "Netflix", "Warner Bros. Discovery", "Paramount Global", "Sony Pictures"];
     } else if (descText.includes("pharma") || descText.includes("drug") || descText.includes("biotech") || descText.includes("medical") || descText.includes("health")) {
-      detectedIndustry = "Pharmaceuticals";
+      detectedIndustry = "Life Sciences & Healthcare";
       detectedPeers = ["AstraZeneca", "GSK", "Pfizer", "Novartis", "Roche"];
     } else if (descText.includes("oil") || descText.includes("gas") || descText.includes("petroleum") || descText.includes("energy") || descText.includes("power")) {
       detectedIndustry = "Integrated Energy";
@@ -566,15 +572,17 @@ export async function fetchCompanyInfo(companyName: string, description: string 
 
       Extract the following information:
       1. Industry Classification: Map to exactly one of the standard classifications below:
-         - "Consumer Health & FMCG"
+         - "Consumer & FMCG"
          - "Banking & Financial Services"
          - "Integrated Energy"
          - "Transport & Logistics"
-         - "Pharmaceuticals"
+         - "Life Sciences & Healthcare"
          - "Diversified Industrials"
          - "Technology & Telecom"
          - "Retail & E-commerce"
          - "Automotive & Manufacturing"
+         - "Professional Services"
+         - "Media & Entertainment"
          - If it doesn't fit any of the above, map it to a similar high-level clean industry name.
       2. Primary Geographies: List of 2 to 4 major countries of operation (e.g. ["United States", "United Kingdom", "Germany", "Japan"]). AVOID broad regional codes like "EU" or "Asia" — specify actual countries.
       3. Peer Benchmark Group: List of 3 to 5 top direct competitor company names (do not use generic terms like "Competitor A").
@@ -622,7 +630,7 @@ export interface RiskTemplate {
 }
 
 export const INDUSTRY_RISK_TEMPLATES: Record<string, Omit<RiskTemplate, "lastReviewedAt" | "nextReviewAt">[]> = {
-  "Consumer Health & FMCG": [
+  "Consumer & FMCG": [
     { code: "RR-01", title: "Regulatory Non-Compliance (EUDR & CSRD)", category: "Regulatory", ownerRole: "Chief Risk Officer", ownerName: "S. Rahman", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.8, trendDirection: "Up", trendValue: 1.4, horizon: "near", isPrincipal: true, peerGap: true },
     { code: "RR-02", title: "Generative AI Systems Governance Gaps", category: "Technology & AI", ownerRole: "Chief Technology Officer", ownerName: "M. Chen", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.5, trendDirection: "Up", trendValue: 1.8, horizon: "near", isPrincipal: true, peerGap: true },
     { code: "RR-03", title: "Suez/Rotterdam Shipping Lane Bottlenecks", category: "Geopolitical", ownerRole: "Head of Global Supply Chain", ownerName: "V. Dupont", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.9, trendDirection: "Stable", trendValue: 0.0, horizon: "med", isPrincipal: true, peerGap: false },
@@ -646,7 +654,7 @@ export const INDUSTRY_RISK_TEMPLATES: Record<string, Omit<RiskTemplate, "lastRev
     { code: "RR-05", title: "Server Site Power Grid Overloads & Water-Cooling", category: "Climate & nature", ownerRole: "Director of Sustainability", ownerName: "O. Nielsen", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 5.5, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: false },
     { code: "RR-06", title: "AI Infrastructure Over-Investment vs Yield Squeeze", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "P. Croft", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.2, trendDirection: "Up", trendValue: 0.9, horizon: "med", isPrincipal: true, peerGap: true }
   ],
-  "Pharmaceuticals": [
+  "Life Sciences & Healthcare": [
     { code: "RR-01", title: "Drug Approval Delays & Patent Cliff Compliance", category: "Regulatory", ownerRole: "Head of Regulatory Science", ownerName: "Dr. A. Carter", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.8, trendDirection: "Stable", trendValue: 0.0, horizon: "med", isPrincipal: true, peerGap: false },
     { code: "RR-02", title: "AI Drug Discovery IP Theft & Lab Leaks", category: "Technology & AI", ownerRole: "Chief Digital Officer", ownerName: "P. Tremblay", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.3, trendDirection: "Up", trendValue: 1.1, horizon: "near", isPrincipal: true, peerGap: true },
     { code: "RR-03", title: "Critical API Export Blockades & Trade Tariffs", category: "Geopolitical", ownerRole: "Head of Trade & Supply Compliance", ownerName: "M. Al-Mutawa", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.7, trendDirection: "Up", trendValue: 1.6, horizon: "near", isPrincipal: true, peerGap: true },
@@ -693,6 +701,22 @@ export const INDUSTRY_RISK_TEMPLATES: Record<string, Omit<RiskTemplate, "lastRev
     { code: "RR-04", title: "Battery Cell & Semiconductor OEM Supply Blockades", category: "Supply chain", ownerRole: "Director of Logistics & Operations", ownerName: "P. Santos", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.2, trendDirection: "Up", trendValue: 0.5, horizon: "med", isPrincipal: false, peerGap: false },
     { code: "RR-05", title: "Plant Hydropower Outages & Casting Site Water Scarcity", category: "Climate & nature", ownerRole: "Director of Environmental Strategy", ownerName: "S. Nilsson", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 6.2, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: true },
     { code: "RR-06", title: "High Capital Cost of EV Re-tooling & Metal Prices", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "G. Rossi", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.5, trendDirection: "Up", trendValue: 0.9, horizon: "med", isPrincipal: true, peerGap: true }
+  ],
+  "Professional Services": [
+    { code: "RR-01", title: "Auditing & Advisory Independence Compliance (SEC/PCAOB rules)", category: "Regulatory", ownerRole: "Chief Compliance Officer", ownerName: "E. Jenkins", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.5, trendDirection: "Stable", trendValue: 0.0, horizon: "near", isPrincipal: true, peerGap: false },
+    { code: "RR-02", title: "Proprietary GenAI Model Leakage & Client Data Breach", category: "Technology & AI", ownerRole: "Chief Technology Officer", ownerName: "M. Chen", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.5, trendDirection: "Up", trendValue: 1.2, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-03", title: "Geopolitical Tensions Limiting Offshoring Delivery Centers", category: "Geopolitical", ownerRole: "Head of Global Operations", ownerName: "A. Carter", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.4, trendDirection: "Up", trendValue: 0.4, horizon: "med", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Key Talent Sourcing Bottlenecks & Subcontractor Delivery Delays", category: "Supply chain", ownerRole: "Director of Procurement", ownerName: "J. Kovacs", inherentRating: "Medium", controlEffectiveness: "Partial", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.0, trendDirection: "Up", trendValue: 0.5, horizon: "near", isPrincipal: false, peerGap: true },
+    { code: "RR-05", title: "Scope 3 Travel Emission Penalties & Offsetting Liabilities", category: "Climate & nature", ownerRole: "Director of ESG Strategy", ownerName: "A. Lindstrom", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 5.8, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: false },
+    { code: "RR-06", title: "Consulting Budget Cuts & Corporate Cost Reduction Margin Squeeze", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "K. Patel", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.2, trendDirection: "Up", trendValue: 0.7, horizon: "near", isPrincipal: true, peerGap: true }
+  ],
+  "Media & Entertainment": [
+    { code: "RR-01", title: "Digital Markets Act (DMA) & Copyright Licensing Compliance", category: "Regulatory", ownerRole: "VP of Legal Affairs", ownerName: "C. Fletcher", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "Within", score: 6.3, trendDirection: "Stable", trendValue: 0.0, horizon: "med", isPrincipal: true, peerGap: false },
+    { code: "RR-02", title: "AI-Generated Content Copyright Disputes & Streaming Cybersecurity", category: "Technology & AI", ownerRole: "Chief Security Officer", ownerName: "J. Rinaldi", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.4, trendDirection: "Up", trendValue: 1.5, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-03", title: "Cross-Border Content Censorship & Regional Access Limits", category: "Geopolitical", ownerRole: "Head of Government Relations", ownerName: "K. Tanaka", inherentRating: "High", controlEffectiveness: "Partial", residualRating: "High", appetiteStatus: "Breach", score: 8.2, trendDirection: "Up", trendValue: 1.1, horizon: "near", isPrincipal: true, peerGap: true },
+    { code: "RR-04", title: "Production Studio Strike Disruption & Distribution Supply Bottlenecks", category: "Supply chain", ownerRole: "VP of Global Supply Chain", ownerName: "F. Bianchi", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.1, trendDirection: "Up", trendValue: 0.4, horizon: "med", isPrincipal: false, peerGap: false },
+    { code: "RR-05", title: "Film Set Greenhouse Gas Restrictions & Eco Production Rules", category: "Climate & nature", ownerRole: "Head of Sustainability", ownerName: "O. Nielsen", inherentRating: "Medium", controlEffectiveness: "Adequate", residualRating: "Low", appetiteStatus: "Within", score: 5.5, trendDirection: "Stable", trendValue: 0.0, horizon: "long", isPrincipal: false, peerGap: true },
+    { code: "RR-06", title: "Ad-Spend Contraction & High Production Cost Capital Squeeze", category: "Financial & macro", ownerRole: "Chief Financial Officer", ownerName: "P. Croft", inherentRating: "High", controlEffectiveness: "Adequate", residualRating: "Medium", appetiteStatus: "At tolerance", score: 7.6, trendDirection: "Up", trendValue: 0.8, horizon: "near", isPrincipal: true, peerGap: true }
   ]
 };
 
@@ -702,7 +726,7 @@ export async function fetchRisksForCompany(
   geographies: string[],
   peers: string[]
 ): Promise<Omit<RiskTemplate, "lastReviewedAt" | "nextReviewAt">[]> {
-  const defaultPayload = INDUSTRY_RISK_TEMPLATES[industry] || INDUSTRY_RISK_TEMPLATES["Consumer Health & FMCG"];
+  const defaultPayload = INDUSTRY_RISK_TEMPLATES[industry] || INDUSTRY_RISK_TEMPLATES["Consumer & FMCG"];
 
   if (!genAI) {
     console.warn("Gemini AI API Key not configured. Returning static fallback industry risk templates.");

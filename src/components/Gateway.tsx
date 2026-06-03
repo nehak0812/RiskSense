@@ -20,38 +20,40 @@ const SCANNING_STEPS = [
 
 // Presets used as initial suggestions when search is empty
 const FORBES_2000 = [
-  { name: "Brightwell plc", industry: "Consumer Health & FMCG", geographies: ["UK", "EU", "US"], peers: ["Reckitt", "Haleon", "Unilever"], meta: "FTSE 100 · LON: BWL", featured: true },
+  { name: "Brightwell plc", industry: "Consumer & FMCG", geographies: ["UK", "EU", "US"], peers: ["Reckitt", "Haleon", "Unilever"], meta: "FTSE 100 · LON: BWL", featured: true },
   { name: "JPMorgan Chase", industry: "Banking & Financial Services", geographies: ["US", "UK", "Global"], peers: ["Bank of America", "Citigroup", "Goldman Sachs", "Morgan Stanley"], meta: "NYSE: JPM" },
   { name: "Saudi Aramco", industry: "Integrated Energy", geographies: ["Saudi Arabia", "Global"], peers: ["Shell", "ExxonMobil", "Chevron", "BP"], meta: "TADAWUL: 2222" },
   { name: "Apple", industry: "Technology & Telecom", geographies: ["US", "China", "Global"], peers: ["Microsoft", "Google", "Samsung", "Sony"], meta: "NASDAQ: AAPL" },
   { name: "Microsoft", industry: "Technology & Telecom", geographies: ["US", "EU", "Global"], peers: ["Apple", "Google", "Amazon", "Oracle"], meta: "NASDAQ: MSFT" },
   { name: "Shell", industry: "Integrated Energy", geographies: ["UK", "Netherlands", "Global"], peers: ["Saudi Aramco", "ExxonMobil", "BP", "Chevron"], meta: "NYSE: SHEL" },
-  { name: "Unilever", industry: "Consumer Health & FMCG", geographies: ["UK", "EU", "Global"], peers: ["Nestlé", "P&G", "Reckitt", "Danone"], meta: "NYSE: UL" },
-  { name: "Nestlé", industry: "Consumer Health & FMCG", geographies: ["Switzerland", "Global"], peers: ["Unilever", "P&G", "Danone", "Mondelēz"], meta: "SIX: NESN" },
-  { name: "Novartis", industry: "Pharmaceuticals", geographies: ["Switzerland", "Global"], peers: ["Roche", "Pfizer", "Merck", "AstraZeneca"], meta: "NYSE: NVS" },
+  { name: "Unilever", industry: "Consumer & FMCG", geographies: ["UK", "EU", "Global"], peers: ["Nestlé", "P&G", "Reckitt", "Danone"], meta: "NYSE: UL" },
+  { name: "Nestlé", industry: "Consumer & FMCG", geographies: ["Switzerland", "Global"], peers: ["Unilever", "P&G", "Danone", "Mondelēz"], meta: "SIX: NESN" },
+  { name: "Novartis", industry: "Life Sciences & Healthcare", geographies: ["Switzerland", "Global"], peers: ["Roche", "Pfizer", "Merck", "AstraZeneca"], meta: "NYSE: NVS" },
   { name: "Sterling Atlantic Bank", industry: "Banking & Financial Services", geographies: ["UK", "US"], peers: ["Barclays", "HSBC", "Lloyds"], meta: "FTSE 100 · LON: STA" },
   { name: "Caldera Energy Group", industry: "Integrated Energy", geographies: ["UK", "North Sea"], peers: ["BP", "Shell", "TotalEnergies"], meta: "FTSE 100 · LON: CEG" },
   { name: "Northwind Logistics", industry: "Transport & Logistics", geographies: ["UK", "EU"], peers: ["DHL", "FedEx", "DSV"], meta: "FTSE 250 · LON: NWL" },
-  { name: "Veridian Pharma", industry: "Pharmaceuticals", geographies: ["UK", "US"], peers: ["GSK", "AstraZeneca", "Pfizer"], meta: "FTSE 100 · LON: VRD" },
+  { name: "Veridian Pharma", industry: "Life Sciences & Healthcare", geographies: ["UK", "US"], peers: ["GSK", "AstraZeneca", "Pfizer"], meta: "FTSE 100 · LON: VRD" },
   { name: "Aboukir Industries", industry: "Diversified Industrials", geographies: ["UK", "Egypt"], peers: ["Siemens", "GE", "Honeywell"], meta: "FTSE 100 · LON: ABK" },
   { name: "Amazon", industry: "Technology & Telecom", geographies: ["US", "EU", "Global"], peers: ["Walmart", "Target", "eBay", "Alibaba"], meta: "NASDAQ: AMZN" },
   { name: "ExxonMobil", industry: "Integrated Energy", geographies: ["US", "Global"], peers: ["Chevron", "Shell", "BP", "Saudi Aramco"], meta: "NYSE: XOM" },
   { name: "Toyota Motor", industry: "Diversified Industrials", geographies: ["Japan", "US", "Global"], peers: ["Volkswagen", "Ford", "General Motors", "Honda"], meta: "TSE: 7203" },
   { name: "Samsung Electronics", industry: "Technology & Telecom", geographies: ["South Korea", "Global"], peers: ["Apple", "Sony", "TSMC", "Intel"], meta: "KRX: 005930" },
-  { name: "Walmart", industry: "Consumer Health & FMCG", geographies: ["US", "Global"], peers: ["Amazon", "Target", "Costco", "Kroger"], meta: "NYSE: WMT" },
+  { name: "Walmart", industry: "Consumer & FMCG", geographies: ["US", "Global"], peers: ["Amazon", "Target", "Costco", "Kroger"], meta: "NYSE: WMT" },
   { name: "Goldman Sachs", industry: "Banking & Financial Services", geographies: ["US", "Global"], peers: ["Morgan Stanley", "JPMorgan Chase", "Citigroup"], meta: "NYSE: GS" },
 ];
 
 const INDUSTRIES = [
-  "Consumer Health & FMCG",
+  "Consumer & FMCG",
   "Banking & Financial Services",
   "Integrated Energy",
   "Transport & Logistics",
-  "Pharmaceuticals",
+  "Life Sciences & Healthcare",
   "Diversified Industrials",
   "Technology & Telecom",
   "Retail & E-commerce",
   "Automotive & Manufacturing",
+  "Professional Services",
+  "Media & Entertainment",
 ];
 
 const COUNTRIES_LIST = [
@@ -83,15 +85,17 @@ const COUNTRIES_LIST = [
 ];
 
 const PEER_OPTIONS_BY_INDUSTRY: Record<string, string[]> = {
-  "Consumer Health & FMCG": ["Unilever", "Nestlé", "Procter & Gamble", "Reckitt", "Danone", "Haleon", "Mondelēz", "L'Oréal", "Colgate-Palmolive", "Johnson & Johnson", "Tesco", "Walmart", "Kroger", "Costco"],
+  "Consumer & FMCG": ["Unilever", "Nestlé", "Procter & Gamble", "Reckitt", "Danone", "Haleon", "Mondelēz", "L'Oréal", "Colgate-Palmolive", "Johnson & Johnson", "Tesco", "Walmart", "Kroger", "Costco"],
   "Banking & Financial Services": ["JPMorgan Chase", "Goldman Sachs", "Morgan Stanley", "Citigroup", "Bank of America", "Barclays", "HSBC", "Lloyds", "NatWest", "Standard Chartered", "UBS", "BNP Paribas", "Deutsche Bank"],
   "Integrated Energy": ["Saudi Aramco", "Shell", "ExxonMobil", "Chevron", "BP", "TotalEnergies", "Eni", "Equinor", "Caldera Energy Group"],
   "Transport & Logistics": ["DHL", "FedEx", "UPS", "DSV", "Maersk", "DP World", "Kuehne + Nagel", "Northwind Logistics"],
-  "Pharmaceuticals": ["AstraZeneca", "GSK", "Pfizer", "Novartis", "Roche", "Sanofi", "Merck", "Eli Lilly", "Johnson & Johnson", "Bayer", "Veridian Pharma"],
+  "Life Sciences & Healthcare": ["AstraZeneca", "GSK", "Pfizer", "Novartis", "Roche", "Sanofi", "Merck", "Eli Lilly", "Johnson & Johnson", "Bayer", "Veridian Pharma"],
   "Diversified Industrials": ["Siemens", "General Electric", "ABB", "Schneider Electric", "Honeywell", "Caterpillar", "3M", "Aboukir Industries"],
   "Technology & Telecom": ["Apple", "Microsoft", "Google", "Meta", "Amazon", "Samsung", "Sony", "TSMC", "Intel", "Nvidia", "Cisco", "Oracle", "Salesforce", "T-Mobile", "AT&T"],
   "Retail & E-commerce": ["Amazon", "Walmart", "Target", "Costco", "eBay", "Alibaba", "JD.com", "Home Depot", "Carrefour"],
   "Automotive & Manufacturing": ["Toyota", "Volkswagen", "Ford", "General Motors", "Honda", "Hyundai", "Tesla", "BMW", "Mercedes-Benz", "Stellantis"],
+  "Professional Services": ["Accenture", "Deloitte", "PwC", "EY", "KPMG", "McKinsey", "Boston Consulting Group", "Bain & Company", "Infosys", "Cognizant", "Wipro"],
+  "Media & Entertainment": ["Disney", "Netflix", "Warner Bros. Discovery", "Paramount Global", "Sony Pictures", "Universal Pictures", "Comcast", "Fox Corporation", "Spotify", "YouTube"]
 };
 
 interface GatewayProps {
@@ -117,7 +121,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
 
   // Form fields
   const [formName, setFormName] = useState("");
-  const [formIndustry, setFormIndustry] = useState("Consumer Health & FMCG");
+  const [formIndustry, setFormIndustry] = useState("Consumer & FMCG");
   const [formGeographies, setFormGeographies] = useState<string[]>(["United States", "United Kingdom"]);
   const [formPeers, setFormPeers] = useState<string[]>(["Unilever", "Nestlé", "Procter & Gamble"]);
 
@@ -201,10 +205,15 @@ export default function Gateway({ onSelect }: GatewayProps) {
     return list;
   }, [formIndustry]);
 
-  // Dynamically calculate competitor suggestions based on the chosen industry
+  // Dynamically calculate competitor suggestions - return the full list of unique organisations
   const peerOptions = React.useMemo(() => {
-    return PEER_OPTIONS_BY_INDUSTRY[formIndustry] || FORBES_2000.map(o => o.name);
-  }, [formIndustry]);
+    const allPeers = new Set<string>();
+    FORBES_2000.forEach(c => allPeers.add(c.name));
+    Object.values(PEER_OPTIONS_BY_INDUSTRY).forEach(list => {
+      list.forEach(p => allPeers.add(p));
+    });
+    return Array.from(allPeers).sort();
+  }, []);
 
   const handleSelectCompany = async (company: any) => {
     setIsScanning(true);
@@ -256,7 +265,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
       setScanStep(SCANNING_STEPS.length);
 
       setFormName(data.name || company.name);
-      setFormIndustry(data.industry || company.industry || "Consumer Health & FMCG");
+      setFormIndustry(data.industry || company.industry || "Consumer & FMCG");
       
       let geos: string[] = ["United States", "United Kingdom"];
       if (Array.isArray(data.geographies)) {
@@ -287,7 +296,7 @@ export default function Gateway({ onSelect }: GatewayProps) {
 
       // Check if this matches one of our local preset configurations
       const preset = FORBES_2000.find(p => p.name.toLowerCase() === company.name.toLowerCase());
-      const fallbackIndustry = preset?.industry || "Consumer Health & FMCG";
+      const fallbackIndustry = preset?.industry || "Consumer & FMCG";
       const fallbackGeographies = preset?.geographies || ["United States", "United Kingdom"];
       const fallbackPeers = preset?.peers || (PEER_OPTIONS_BY_INDUSTRY[fallbackIndustry]?.slice(0, 3) || ["Unilever", "Nestlé", "Procter & Gamble"]);
       
