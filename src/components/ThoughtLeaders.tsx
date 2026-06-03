@@ -20,6 +20,20 @@ const REPORTS = [
   },
   {
     id: "r2",
+    publisher: "World Economic Forum",
+    mark: "WEF",
+    markColor: "var(--teal)",
+    title: "Chief Economists Outlook (May 2026)",
+    date: "May 28, 2026",
+    horizon: "12-month",
+    url: "https://www.weforum.org/publications/chief-economists-outlook-may-2026/",
+    topRisks: ["Trade policy uncertainty", "Geopolitical tension", "Fiscal policy pressure", "Economic volatility"],
+    summary:
+      "Analyzes the challenges facing global policy coordination, highlighting the threat of geopolitical fragmentation to cross-border supply lines and macroeconomic growth stability.",
+    domains: ["fin", "trade", "geo"],
+  },
+  {
+    id: "r3",
     publisher: "International Monetary Fund",
     mark: "IMF",
     markColor: "var(--accent)",
@@ -33,7 +47,21 @@ const REPORTS = [
     domains: ["fin", "trade", "geo"],
   },
   {
-    id: "r3",
+    id: "r4",
+    publisher: "International Monetary Fund",
+    mark: "IMF",
+    markColor: "var(--accent)",
+    title: "World Economic Outlook, October 2025",
+    date: "Oct 14, 2025",
+    horizon: "12-month",
+    url: "https://www.imf.org/en/Publications/WEO/Issues/2025/10/14/world-economic-outlook-october-2025",
+    topRisks: ["Global growth deceleration", "Interest rate volatility", "Commodity supply shocks", "Financial decoupling"],
+    summary:
+      "Outlines prospects for low medium-term growth. Identifies geopolitical division and protectionist trade tariffs as major factors inhibiting investment and supply chains.",
+    domains: ["fin", "trade", "geo"],
+  },
+  {
+    id: "r5",
     publisher: "World Bank",
     mark: "WB",
     markColor: "var(--green)",
@@ -47,7 +75,21 @@ const REPORTS = [
     domains: ["trade", "clim", "fin"],
   },
   {
-    id: "r4",
+    id: "r6",
+    publisher: "World Bank",
+    mark: "WB",
+    markColor: "var(--green)",
+    title: "World Development Report 2025: Standards for Development",
+    date: "Dec 11, 2025",
+    horizon: "3-year",
+    url: "https://www.worldbank.org/en/publication/wdr2025",
+    topRisks: ["Regulatory compliance gap", "Infrastructure deficit", "Technological fragmentation", "Economic exclusion"],
+    summary:
+      "Explores how standardized regulations, technological frameworks, and quality infrastructure can unlock economic integration for developing nations while managing transition risks.",
+    domains: ["tech", "reg", "fin"],
+  },
+  {
+    id: "r7",
     publisher: "Deloitte",
     mark: "D",
     markColor: "var(--d-fin)",
@@ -61,7 +103,21 @@ const REPORTS = [
     domains: ["tech", "reg", "trade"],
   },
   {
-    id: "r5",
+    id: "r8",
+    publisher: "Deloitte",
+    mark: "D",
+    markColor: "var(--d-fin)",
+    title: "Deloitte 2025 C-suite Sustainability Report",
+    date: "Feb 2026",
+    horizon: "2-year",
+    url: "https://delo.tt/6057h5q5X",
+    topRisks: ["Physical climate damage", "Transition regulation", "Water scarcity", "Resource security"],
+    summary:
+      "Gathers survey responses from over 2,100 C-suite executives globally. Evaluates how companies align sustainability investments with business strategy, technology adoption, and climate adaptation.",
+    domains: ["clim", "tech", "reg"],
+  },
+  {
+    id: "r9",
     publisher: "PwC",
     mark: "PwC",
     markColor: "var(--d-trade)",
@@ -75,21 +131,49 @@ const REPORTS = [
     domains: ["fin", "tech", "reg"],
   },
   {
-    id: "r6",
-    publisher: "McKinsey & Company",
-    mark: "McK",
-    markColor: "var(--d-tech)",
-    title: "McKinsey on Risk & Resilience (Number 20)",
-    date: "Nov 2025",
-    horizon: "12-month",
-    url: "https://www.mckinsey.com/capabilities/risk-and-resilience/our-insights",
-    topRisks: ["Geopolitical risk", "AI disruption", "Energy transition", "Supply resilience"],
+    id: "r10",
+    publisher: "PwC",
+    mark: "PwC",
+    markColor: "var(--d-trade)",
+    title: "2026 Global Digital Trust Insights Survey",
+    date: "Oct 1, 2025",
+    horizon: "2-year",
+    url: "https://www.pwc.com/gx/en/issues/cybersecurity/digital-trust-insights.html",
+    topRisks: ["GenAI data threats", "Infrastructure cyber attacks", "Third-party compliance", "Cloud security leaks"],
     summary:
-      "Argues geopolitical risk has become a permanent strategic variable and that AI adoption is reshaping both opportunity and operational-risk profiles, requiring scenario-based resilience planning.",
-    domains: ["geo", "tech", "clim"],
+      "Details how cybersecurity compliance is evolving in the age of generative AI, advising boards to mandate third-party infrastructure defense and standardise log trails.",
+    domains: ["tech", "reg", "soc"],
   },
   {
-    id: "r7",
+    id: "r11",
+    publisher: "EY",
+    mark: "EY",
+    markColor: "var(--d-reg)",
+    title: "Geopolitical Outlook for 2026: Rewired for Risk & Resilience",
+    date: "Jan 8, 2026",
+    horizon: "12-month",
+    url: "https://www.ey.com/en_gl/insights/geostrategy/geostrategic-outlook",
+    topRisks: ["Multipolar alliance shifts", "Supply chain decoupling", "Resource nationalism", "Bilateral tariff hikes"],
+    summary:
+      "Examines geostrategic forces reshaping global supply chains and regulatory frameworks. Advises executive boards to prepare for regionalized trade blocs and critical commodity blocks.",
+    domains: ["geo", "trade", "clim"],
+  },
+  {
+    id: "r12",
+    publisher: "EY",
+    mark: "EY",
+    markColor: "var(--d-reg)",
+    title: "EY Global Risk Transformation Study 2025",
+    date: "Sep 10, 2025",
+    horizon: "2-year",
+    url: "https://www.ey.com/en_gl/risk/consulting",
+    topRisks: ["Compliance complexity", "Cyber threat escalation", "AI alignment failure", "Macro volatility"],
+    summary:
+      "Surveys risk leaders on corporate transformation. Recommends automating compliance workflows, standardizing tech risk frameworks, and integrating ERM systems with real-time thought data.",
+    domains: ["reg", "tech", "fin"],
+  },
+  {
+    id: "r13",
     publisher: "KPMG",
     mark: "KPMG",
     markColor: "var(--d-soc)",
@@ -103,11 +187,53 @@ const REPORTS = [
     domains: ["reg", "tech", "clim", "soc"],
   },
   {
-    id: "r8",
+    id: "r14",
+    publisher: "KPMG",
+    mark: "KPMG",
+    markColor: "var(--d-soc)",
+    title: "KPMG 2025 Global CEO Outlook",
+    date: "Sep 15, 2025",
+    horizon: "3-year",
+    url: "https://home.kpmg/xx/en/home/insights/2025/09/kpmg-2025-ceo-outlook.html",
+    topRisks: ["AI investment governance", "Geopolitical fragmentation", "Macro economic volatility", "Talent shortages"],
+    summary:
+      "Surveys over 1,300 CEOs on growth confidence. Outlines top investment focuses, listing generative AI, transparent corporate governance, and talent resilience as core drivers.",
+    domains: ["fin", "tech", "reg"],
+  },
+  {
+    id: "r15",
+    publisher: "McKinsey & Company",
+    mark: "McK",
+    markColor: "var(--d-tech)",
+    title: "McKinsey on Risk & Resilience (Number 20)",
+    date: "Nov 15, 2025",
+    horizon: "12-month",
+    url: "https://www.mckinsey.com/capabilities/risk-and-resilience/our-insights",
+    topRisks: ["Geopolitical risk", "AI disruption", "Energy transition", "Supply resilience"],
+    summary:
+      "Argues geopolitical risk has become a permanent strategic variable and that AI adoption is reshaping both opportunity and operational-risk profiles, requiring scenario-based resilience planning.",
+    domains: ["geo", "tech", "clim"],
+  },
+  {
+    id: "r16",
+    publisher: "McKinsey & Company",
+    mark: "McK",
+    markColor: "var(--d-tech)",
+    title: "State of AI Trust in 2026: Shifting to the Agentic Era",
+    date: "Mar 25, 2026",
+    horizon: "2-year",
+    url: "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-trust-in-2026-shifting-to-the-agentic-era",
+    topRisks: ["Autonomous agent bias", "Hallucination liabilities", "System integration vulnerabilities", "Model compliance"],
+    summary:
+      "Outlines trust challenges in deploying agentic AI systems. Recommends implementing strict transparency checks, autonomous audits, and strict compliance boundaries.",
+    domains: ["tech", "reg", "soc"],
+  },
+  {
+    id: "r17",
     publisher: "BCG",
     mark: "BCG",
     markColor: "var(--d-clim)",
-    title: "Trade in Transition: How to Prepare for a Patchwork World Order",
+    title: "Trade in Transition: Preparing for Patchwork World Order",
     date: "Jan 8, 2026",
     horizon: "24-month",
     url: "https://www.bcg.com/publications/2026/trade-in-transition-patchwork-world-order",
@@ -116,49 +242,84 @@ const REPORTS = [
       "Stresses building structural supply-chain resilience against a backdrop of geopolitical fragmentation and accelerating climate-transition requirements.",
     domains: ["trade", "geo", "clim"],
   },
+  {
+    id: "r18",
+    publisher: "BCG",
+    mark: "BCG",
+    markColor: "var(--d-clim)",
+    title: "Risk and Compliance 2026: Refining Oversight",
+    date: "Mar 12, 2026",
+    horizon: "2-year",
+    url: "https://www.bcg.com/capabilities/risk-management-compliance/insights",
+    topRisks: ["Regulatory divergence", "Geopolitical compliance", "GenAI security gaps", "Resilience auditing"],
+    summary:
+      "Discusses refining compliance frameworks for a volatile, AI-driven world. Recommends aligning risk oversight with emerging AI models and auditing geopolitical vulnerabilities.",
+    domains: ["reg", "tech", "geo"],
+  },
+  {
+    id: "r19",
+    publisher: "Bain & Company",
+    mark: "Bain",
+    markColor: "#cc0000",
+    title: "Bain Technology Report 2025",
+    date: "Sep 24, 2025",
+    horizon: "12-month",
+    url: "https://www.bain.com/insights/topics/technology-report/",
+    topRisks: ["AI agent security", "Hardware supply bottlenecks", "Cloud dependency risk", "Talent constraints"],
+    summary:
+      "Examines structural shifts in the tech sector, detailing generative AI infrastructure dependencies, sovereignty restrictions on semiconductors, and model verification risks.",
+    domains: ["tech", "fin", "trade"],
+  },
+  {
+    id: "r20",
+    publisher: "Bain & Company",
+    mark: "Bain",
+    markColor: "#cc0000",
+    title: "Bain Global M&A Report 2026",
+    date: "Jan 27, 2026",
+    horizon: "2-year",
+    url: "https://www.bain.com/insights/topics/global-ma-report/",
+    topRisks: ["Geopolitical deal friction", "AI capability acquisition", "Valuation volatility", "Regulatory review delays"],
+    summary:
+      "Highlights key M&A trends for corporate growth. Advises leaders to navigate protectionist foreign investment reviews and capture AI synergies with resilience.",
+    domains: ["fin", "geo", "tech"],
+  },
 ];
 
 const SYNTHESIS = [
   {
     domain: "geo",
     consensus: "high",
-    sources: 7,
     note: "Near-universal: geopolitical confrontation now treated as a structural, persistent risk rather than a tail event.",
   },
   {
     domain: "trade",
     consensus: "high",
-    sources: 6,
     note: "Strong agreement that trade fragmentation and tariffs are a top near-term drag on growth and cost.",
   },
   {
     domain: "tech",
     consensus: "high",
-    sources: 7,
     note: "Consensus that cyber and AI-governance risk is rising fastest; framed as both threat and opportunity.",
   },
   {
     domain: "fin",
     consensus: "med",
-    sources: 5,
     note: "Partial divergence on whether inflation re-anchors higher or eases; debt-stress emphasis varies by source.",
   },
   {
     domain: "clim",
     consensus: "med",
-    sources: 6,
     note: "Agreement on long-run severity, but divergence on near-term prioritisation vs geopolitical and macro risks.",
   },
   {
     domain: "reg",
     consensus: "med",
-    sources: 4,
     note: "Advisory firms stress regulatory complexity; multilaterals emphasise it less directly.",
   },
   {
     domain: "soc",
     consensus: "low",
-    sources: 3,
     note: "Divergent: misinformation and reputational risk feature prominently for some, peripherally for others.",
   },
 ];
@@ -227,7 +388,7 @@ export default function ThoughtLeaders() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "150px 92px 1fr 110px",
+              gridTemplateColumns: "150px 92px 1fr 132px",
               gap: 14,
               padding: "0 0 8px",
               borderBottom: "1px solid var(--border)",
@@ -245,13 +406,14 @@ export default function ThoughtLeaders() {
           </div>
           
           {SYNTHESIS.map((s) => {
+            const sourcesCiting = REPORTS.filter((r) => r.domains.includes(s.domain)).length;
             return (
               <div
                 key={s.domain}
                 className="synth-row"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "150px 92px 1fr 110px",
+                  gridTemplateColumns: "150px 92px 1fr 132px",
                   alignItems: "center",
                   padding: "12px 0",
                   borderBottom: "1px solid var(--border)",
@@ -270,14 +432,14 @@ export default function ThoughtLeaders() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
                   <div style={{ display: "flex", gap: 2 }}>
-                    {Array.from({ length: 8 }).map((_, i) => (
+                    {Array.from({ length: REPORTS.length }).map((_, i) => (
                       <span
                         key={i}
                         style={{
-                          width: 6,
+                          width: 2.5,
                           height: 14,
-                          borderRadius: 2,
-                          background: i < s.sources ? `var(--d-${s.domain})` : "var(--bg4)",
+                          borderRadius: 1,
+                          background: i < sourcesCiting ? `var(--d-${s.domain})` : "var(--bg4)",
                         }}
                       ></span>
                     ))}
@@ -286,7 +448,7 @@ export default function ThoughtLeaders() {
                     className="serif num"
                     style={{ fontSize: 13, fontWeight: 600, minWidth: 28, textAlign: "right" }}
                   >
-                    {s.sources}/8
+                    {sourcesCiting}/{REPORTS.length}
                   </span>
                 </div>
               </div>
