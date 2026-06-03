@@ -254,3 +254,83 @@ function getMockSearchResults(query: string): any[] {
     }
   ];
 }
+
+interface CompanyInfo {
+  name: string;
+  industry: string;
+  geographies: string[];
+  peers: string[];
+}
+
+export async function fetchCompanyInfo(companyName: string): Promise<CompanyInfo> {
+  const defaultPayload: CompanyInfo = {
+    name: companyName,
+    industry: "Consumer Health & FMCG",
+    geographies: ["US", "EU", "UK"],
+    peers: ["Competitor A", "Competitor B", "Competitor C"],
+  };
+
+  // 1. Tavily Search for background context
+  let context = "";
+  try {
+    const query = `"${companyName}" corporate headquarters industry main competitors`;
+    const searchResults = await searchWeb(query);
+    if (searchResults && searchResults.length > 0) {
+      context = searchResults.map(r => `Title: ${r.title}\nContent: ${r.content}`).join("\n\n");
+    }
+  } catch (err) {
+    console.error("Error during company info search:", err);
+  }
+
+  if (!genAI) {
+    console.warn("Gemini AI API Key not configured. Returning default company details.");
+    return defaultPayload;
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: { responseMimeType: "application/json" },
+    });
+
+    const prompt = `
+      Retrieve the corporate profile details for: "${companyName}".
+      Use the following search context if available:
+      ${context}
+
+      Extract the following information:
+      1. Industry Classification: Map to exactly one of the standard classifications below:
+         - "Consumer Health & FMCG"
+         - "Banking & Financial Services"
+         - "Integrated Energy"
+         - "Transport & Logistics"
+         - "Pharmaceuticals"
+         - "Diversified Industrials"
+         - If it doesn't fit any of the above, map it to a similar high-level clean industry name (e.g. "Technology & Telecom", "Automotive & Manufacturing", "Retail & E-commerce").
+      2. Primary Geographies: List of 2 to 4 major regions or countries of operation (e.g., ["US", "EU", "UK", "Global", "Asia"]).
+      3. Peer Benchmark Group: List of 3 to 5 top direct competitor companies.
+
+      Format the response strictly as a JSON object matching this structure:
+      {
+        "name": "${companyName}",
+        "industry": "Industry classification",
+        "geographies": ["Geographies"],
+        "peers": ["Competitors"]
+      }
+    `;
+
+    const response = await model.generateContent(prompt);
+    const responseText = response.response.text();
+    const cleanJson = JSON.parse(responseText.trim());
+    return {
+      name: cleanJson.name || companyName,
+      industry: cleanJson.industry || "Consumer Health & FMCG",
+      geographies: Array.isArray(cleanJson.geographies) ? cleanJson.geographies : ["Global"],
+      peers: Array.isArray(cleanJson.peers) ? cleanJson.peers : ["Competitor A", "Competitor B"],
+    };
+  } catch (error) {
+    console.error("Error getting company info with Gemini:", error);
+    return defaultPayload;
+  }
+}
+
